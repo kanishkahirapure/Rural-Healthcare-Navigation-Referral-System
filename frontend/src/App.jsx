@@ -2,6 +2,11 @@ import "./App.css";
 import { Routes, Route, Link } from "react-router-dom";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
+import Dashboard from "./Pages/Dashboard";
+import Facilities from "./Pages/Facilities";
+import AIRecommendation from "./Pages/AIRecommendation";
+import Referral from "./Pages/Referral";
+import Appointment from "./Pages/Appointment";
 
 function Home() {
   return (
@@ -430,6 +435,11 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/facilities" element={<Facilities />} />
+      <Route path="/ai-recommendation" element={<AIRecommendation />} />
+      <Route path="/referrals" element={<Referral />} />
+      <Route path="/appointments" element={<Appointment />} />
     </Routes>
   );
 }
