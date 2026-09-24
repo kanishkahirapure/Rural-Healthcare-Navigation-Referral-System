@@ -7,6 +7,7 @@ import Facilities from "./Pages/Facilities";
 import AIRecommendation from "./Pages/AIRecommendation";
 import Referral from "./Pages/Referral";
 import Appointment from "./Pages/Appointment";
+import Profile from "./Pages/Profile";
 
 function Home() {
   return (
@@ -440,6 +441,7 @@ function App() {
       <Route path="/ai-recommendation" element={<AIRecommendation />} />
       <Route path="/referrals" element={<Referral />} />
       <Route path="/appointments" element={<Appointment />} />
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   );
 }
