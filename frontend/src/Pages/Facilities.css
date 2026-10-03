@@ -10,18 +10,31 @@
   font-family: Arial, sans-serif;
 }
 
-/* Header */
+/* ── Header ── */
 .facilities-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.facilities-badge {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 30px;
+  gap: 7px;
+  background: #e0f4f8;
+  color: #087ea4;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .facilities-header h1 {
-  margin: 0 0 8px;
+  margin: 0 0 7px;
+  color: #102b4e;
   font-size: 32px;
-  color: #123b55;
 }
 
 .facilities-header p {
@@ -31,59 +44,63 @@
 }
 
 .facility-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: white;
-  padding: 13px 18px;
+  padding: 12px 18px;
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   color: #31576c;
   font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 
-/* Search */
+/* ── Search ── */
 .facility-search {
   display: flex;
   align-items: center;
   gap: 12px;
   background: white;
-  padding: 10px 12px;
+  padding: 8px 10px 8px 16px;
   border-radius: 14px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 22px;
-}
-
-.facility-search span {
-  font-size: 20px;
-  padding-left: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+  border: 1.5px solid #e8f0f5;
 }
 
 .facility-search input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 15px;
-  padding: 13px 5px;
+  font-size: 14px;
+  padding: 10px 4px;
   color: #25384a;
+  background: transparent;
 }
 
 .facility-search input::placeholder {
   color: #9aa5af;
 }
 
-.facility-search button {
+.search-go-btn {
   border: none;
-  background: #0f5f78;
+  background: linear-gradient(135deg, #087ea4, #079b91);
   color: white;
-  padding: 13px 24px;
-  border-radius: 9px;
+  padding: 12px 24px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s;
 }
 
-.facility-search button:hover {
-  background: #0b4c60;
+.search-go-btn:hover {
+  opacity: 0.88;
 }
 
-/* Filters */
+/* ── Filters ── */
 .facility-filters {
   display: flex;
   gap: 10px;
@@ -92,23 +109,28 @@
 }
 
 .facility-filters button {
-  border: 1px solid #d7e0e7;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1.5px solid #dbe7ee;
   background: white;
   color: #506170;
-  padding: 10px 18px;
+  padding: 9px 16px;
   border-radius: 20px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 13px;
+  transition: all 0.2s;
+  font-weight: 500;
 }
 
 .facility-filters button:hover,
 .facility-filters .active-filter {
-  background: #0f5f78;
+  background: linear-gradient(135deg, #087ea4, #079b91);
   color: white;
-  border-color: #0f5f78;
+  border-color: transparent;
 }
 
-/* Facility Grid */
+/* ── Grid ── */
 .facility-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -118,92 +140,103 @@
 .facility-card {
   background: white;
   border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.06);
-  transition: 0.3s;
+  padding: 26px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .facility-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
-.facility-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
-  background: #e2f3f6;
+.facility-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 28px;
   margin-bottom: 18px;
 }
 
-.facility-info {
-  position: relative;
-}
+.blue-bg   { background: #e0f4f8; }
+.green-bg  { background: #d1fae5; }
+.purple-bg { background: #ede9fe; }
 
 .available {
-  display: inline-block;
-  background: #e5f7ee;
-  color: #17804d;
-  padding: 5px 9px;
-  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 5px 10px;
+  border-radius: 8px;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 10px;
 }
 
 .facility-info h2 {
   margin: 0 0 10px;
-  color: #173e58;
-  font-size: 20px;
+  color: #102b4e;
+  font-size: 18px;
 }
 
-.facility-info p {
-  margin: 7px 0;
+.fac-type,
+.fac-loc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0;
   color: #6d7b87;
   font-size: 13px;
 }
 
-/* Services */
+/* Services tags */
 .facility-services {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin: 18px 0;
+  margin: 16px 0;
 }
 
 .facility-services span {
   background: #f0f5f8;
   color: #536b79;
-  padding: 6px 9px;
+  padding: 5px 9px;
   border-radius: 6px;
   font-size: 11px;
+  font-weight: 500;
 }
 
-.facility-info button {
+.fac-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   width: 100%;
   border: none;
-  background: #0f5f78;
+  background: linear-gradient(135deg, #087ea4, #079b91);
   color: white;
   padding: 12px;
-  border-radius: 9px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.2s;
 }
 
-.facility-info button:hover {
-  background: #0b4c60;
+.fac-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
 }
 
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 1000px) {
   .facility-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .facilities-page {
     padding: 30px;
   }
@@ -213,19 +246,10 @@
   .facilities-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
+    gap: 16px;
   }
-
   .facility-grid {
     grid-template-columns: 1fr;
-  }
-
-  .facility-search {
-    flex-wrap: wrap;
-  }
-
-  .facility-search input {
-    min-width: 150px;
   }
 }
 
@@ -233,12 +257,10 @@
   .facilities-page {
     padding: 22px 16px;
   }
-
   .facilities-header h1 {
     font-size: 26px;
   }
-
-  .facility-search button {
+  .search-go-btn {
     width: 100%;
   }
 }

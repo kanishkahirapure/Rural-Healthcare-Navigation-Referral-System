@@ -10,29 +10,30 @@
   font-family: Arial, sans-serif;
 }
 
-/* Header */
-
+/* ── Header ── */
 .profile-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .profile-badge {
-  display: inline-block;
-  background: #e2f3f6;
-  color: #0f5f78;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #e0f4f8;
+  color: #087ea4;
   padding: 8px 14px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   margin-bottom: 12px;
 }
 
 .profile-header h1 {
-  margin: 0 0 8px;
-  color: #123b55;
+  margin: 0 0 7px;
+  color: #102b4e;
   font-size: 32px;
 }
 
@@ -43,58 +44,64 @@
 }
 
 .edit-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   border: none;
-  background: #0f5f78;
+  background: linear-gradient(135deg, #087ea4, #079b91);
   color: white;
   padding: 13px 20px;
-  border-radius: 9px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(8, 126, 164, 0.2);
+  transition: opacity 0.2s, transform 0.2s;
 }
 
 .edit-profile-btn:hover {
-  background: #0b4c60;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-/* Main Content */
-
+/* ── Layout ── */
 .profile-content {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 25px;
+  gap: 24px;
 }
 
-/* Profile Card */
-
+/* ── Profile Card ── */
 .profile-card {
   background: white;
   border-radius: 18px;
   padding: 30px;
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .profile-top {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
 }
 
 .profile-avatar {
   width: 82px;
   height: 82px;
   border-radius: 50%;
-  background: #0f5f78;
+  background: linear-gradient(135deg, #087ea4, #079b91);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .profile-top h2 {
-  margin: 0 0 6px;
-  color: #173e58;
+  margin: 0 0 5px;
+  color: #102b4e;
   font-size: 24px;
 }
 
@@ -105,18 +112,21 @@
 }
 
 .profile-active {
-  color: #19734b;
-  background: #e4f7ed;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #065f46;
+  background: #d1fae5;
   padding: 5px 10px;
-  border-radius: 15px;
+  border-radius: 20px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .profile-divider {
   height: 1px;
   background: #edf1f4;
-  margin: 28px 0;
+  margin: 26px 0;
 }
 
 .profile-info {
@@ -128,20 +138,24 @@
 .profile-info-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
 }
 
-.profile-info-item > span {
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: #e8f4f7;
+.pinfo-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  flex-shrink: 0;
 }
+
+.blue-bg   { background: #e0f4f8; }
+.green-bg  { background: #d1fae5; }
+.orange-bg { background: #fef3c7; }
+.purple-bg { background: #ede9fe; }
+.red-bg    { background: #fee2e2; }
 
 .profile-info-item small {
   display: block;
@@ -152,18 +166,18 @@
 
 .profile-info-item strong {
   display: block;
-  color: #31566a;
+  color: #102b4e;
   font-size: 13px;
+  font-weight: 600;
 }
 
-/* Common Cards */
-
+/* ── Personal / Health Cards ── */
 .personal-card,
 .health-profile-card {
   background: white;
   border-radius: 18px;
   padding: 28px;
-  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .card-heading {
@@ -171,8 +185,8 @@
 }
 
 .card-heading h2 {
-  margin: 0 0 6px;
-  color: #173e58;
+  margin: 0 0 5px;
+  color: #102b4e;
   font-size: 20px;
 }
 
@@ -182,8 +196,7 @@
   font-size: 13px;
 }
 
-/* Personal Information */
-
+/* Personal grid */
 .personal-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -193,49 +206,66 @@
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #526673;
-  font-size: 13px;
-  font-weight: 600;
+  color: #344c5c;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.input-group input {
+.pinput-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pinput-icon {
+  position: absolute;
+  left: 13px;
+  color: #9ab0c0;
+  pointer-events: none;
+}
+
+.pinput-wrap input {
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d9e2e7;
-  border-radius: 8px;
-  background: #f8fafb;
+  padding: 12px 14px 12px 40px;
+  border: 1.5px solid #dbe7ee;
+  border-radius: 10px;
+  background: #fafcfe;
   color: #526673;
   font-size: 13px;
   outline: none;
+  font-family: inherit;
 }
 
-/* Healthcare Information */
-
+/* Health grid */
 .health-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 .health-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 18px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #f7fafb;
+  border: 1px solid #edf1f4;
+  transition: transform 0.2s;
 }
 
-.health-item > span {
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: #e8f4f7;
+.health-item:hover {
+  transform: translateY(-2px);
+}
+
+.health-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  flex-shrink: 0;
 }
 
 .health-item small {
@@ -247,57 +277,44 @@
 
 .health-item strong {
   display: block;
-  color: #31566a;
+  color: #102b4e;
   font-size: 12px;
+  font-weight: 600;
 }
 
-/* Tablet */
-
+/* ── Responsive ── */
 @media (max-width: 1000px) {
   .profile-page {
     padding: 30px;
   }
-
   .profile-info {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .health-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Mobile */
-
 @media (max-width: 650px) {
   .profile-page {
     padding: 22px 16px;
   }
-
   .profile-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 18px;
   }
-
   .profile-card,
   .personal-card,
   .health-profile-card {
     padding: 20px;
   }
-
-  .profile-top {
-    align-items: flex-start;
-  }
-
   .profile-info {
     grid-template-columns: 1fr;
   }
-
   .personal-grid {
     grid-template-columns: 1fr;
   }
-
   .health-grid {
     grid-template-columns: 1fr;
   }

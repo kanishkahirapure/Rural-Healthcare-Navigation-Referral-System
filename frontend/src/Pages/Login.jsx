@@ -1,5 +1,9 @@
 import "./Login.css";
 import { Link } from "react-router-dom";
+import {
+  MdEmail, MdLock, MdArrowForward, MdSecurity, MdCheckCircle
+} from "react-icons/md";
+import { FaHeartbeat } from "react-icons/fa";
 
 function Login() {
   return (
@@ -8,7 +12,9 @@ function Login() {
       {/* Left Side */}
       <div className="login-left">
         <div className="login-brand">
-          <div className="login-logo">✚</div>
+          <div className="login-logo">
+            <FaHeartbeat size={24} color="white" />
+          </div>
           <div>
             <h2>RuralCare</h2>
             <span>Healthcare Navigation</span>
@@ -33,17 +39,15 @@ function Login() {
 
           <div className="login-features">
             <div>
-              <span>✓</span>
+              <div className="feat-check"><MdCheckCircle size={16} color="#78eee0" /></div>
               <p>Find suitable healthcare facilities</p>
             </div>
-
             <div>
-              <span>✓</span>
+              <div className="feat-check"><MdCheckCircle size={16} color="#78eee0" /></div>
               <p>AI-assisted healthcare recommendations</p>
             </div>
-
             <div>
-              <span>✓</span>
+              <div className="feat-check"><MdCheckCircle size={16} color="#78eee0" /></div>
               <p>Digital referral management</p>
             </div>
           </div>
@@ -56,33 +60,28 @@ function Login() {
 
       {/* Right Side */}
       <div className="login-right">
-
         <div className="login-card">
 
           <div className="mobile-logo">
-            <div className="login-logo">✚</div>
+            <div className="login-logo">
+              <FaHeartbeat size={22} color="white" />
+            </div>
             <h2>RuralCare</h2>
           </div>
 
           <div className="form-header">
             <span>WELCOME BACK</span>
             <h1>Sign in to your account</h1>
-            <p>
-              Enter your details to continue to RuralCare.
-            </p>
+            <p>Enter your details to continue to RuralCare.</p>
           </div>
 
           <form>
 
             <div className="form-group">
               <label>Email Address</label>
-
               <div className="input-wrapper">
-                <span>✉</span>
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                />
+                <MdEmail size={18} className="inp-icon" />
+                <input type="email" placeholder="Enter your email address" />
               </div>
             </div>
 
@@ -91,13 +90,9 @@ function Login() {
                 <label>Password</label>
                 <a href="#forgot">Forgot password?</a>
               </div>
-
               <div className="input-wrapper">
-                <span>🔒</span>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                />
+                <MdLock size={18} className="inp-icon" />
+                <input type="password" placeholder="Enter your password" />
               </div>
             </div>
 
@@ -108,7 +103,7 @@ function Login() {
 
             <button type="submit" className="login-submit">
               Sign In
-              <span>→</span>
+              <MdArrowForward size={18} />
             </button>
 
           </form>
@@ -118,7 +113,9 @@ function Login() {
           </div>
 
           <div className="demo-login">
-            <span>🔐</span>
+            <div className="demo-icon-wrap">
+              <MdSecurity size={22} color="#087ea4" />
+            </div>
             <div>
               <strong>Secure Healthcare Platform</strong>
               <p>Your information is handled through authorized access.</p>
@@ -133,9 +130,8 @@ function Login() {
         </div>
 
         <p className="security-text">
-          🔒 Secure access • Privacy protected • Healthcare platform
+          <MdLock size={13} /> Secure access • Privacy protected • Healthcare platform
         </p>
-
       </div>
 
     </div>

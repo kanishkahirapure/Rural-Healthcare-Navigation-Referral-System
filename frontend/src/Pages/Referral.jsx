@@ -1,4 +1,10 @@
 import "./Referral.css";
+import {
+  MdAssignment, MdHourglassTop, MdSync, MdCheckCircle,
+  MdAdd, MdLocalHospital, MdCalendarMonth, MdVisibility,
+  MdPlayCircle, MdRadioButtonUnchecked
+} from "react-icons/md";
+import { FaHeartbeat } from "react-icons/fa";
 
 function Referral() {
   return (
@@ -7,13 +13,15 @@ function Referral() {
       {/* Header */}
       <header className="referral-header">
         <div>
-          <span className="referral-badge">📋 Referral Tracking</span>
+          <div className="referral-badge">
+            <MdAssignment size={14} />
+            <span>Referral Tracking</span>
+          </div>
           <h1>My Referrals</h1>
           <p>Track your healthcare referrals and their current status.</p>
         </div>
-
         <button className="new-referral-btn">
-          + New Referral
+          <MdAdd size={18} /> New Referral
         </button>
       </header>
 
@@ -21,7 +29,9 @@ function Referral() {
       <section className="referral-summary">
 
         <div className="summary-card">
-          <span className="summary-icon">📋</span>
+          <div className="sum-icon blue-bg">
+            <MdAssignment size={24} color="#087ea4" />
+          </div>
           <div>
             <h3>3</h3>
             <p>Total Referrals</p>
@@ -29,7 +39,9 @@ function Referral() {
         </div>
 
         <div className="summary-card">
-          <span className="summary-icon">⏳</span>
+          <div className="sum-icon orange-bg">
+            <MdHourglassTop size={24} color="#d97706" />
+          </div>
           <div>
             <h3>1</h3>
             <p>Pending</p>
@@ -37,7 +49,9 @@ function Referral() {
         </div>
 
         <div className="summary-card">
-          <span className="summary-icon">🔄</span>
+          <div className="sum-icon purple-bg">
+            <MdSync size={24} color="#7c3aed" />
+          </div>
           <div>
             <h3>1</h3>
             <p>In Progress</p>
@@ -45,7 +59,9 @@ function Referral() {
         </div>
 
         <div className="summary-card">
-          <span className="summary-icon">✓</span>
+          <div className="sum-icon green-bg">
+            <MdCheckCircle size={24} color="#059669" />
+          </div>
           <div>
             <h3>1</h3>
             <p>Completed</p>
@@ -62,7 +78,6 @@ function Referral() {
             <h2>Referral History</h2>
             <p>Your recent healthcare referrals</p>
           </div>
-
           <select>
             <option>All Referrals</option>
             <option>Pending</option>
@@ -73,68 +88,67 @@ function Referral() {
 
         {/* Referral 1 */}
         <div className="referral-item">
-          <div className="referral-number">01</div>
-
+          <div className="ref-num-badge">01</div>
           <div className="referral-details">
             <h3>General Medicine Consultation</h3>
-            <p>🏥 RuralCare General Hospital</p>
-            <p>📅 23 September 2026</p>
+            <p><MdLocalHospital size={13} /> RuralCare General Hospital</p>
+            <p><MdCalendarMonth size={13} /> 23 September 2026</p>
           </div>
-
-          <span className="status pending">Pending</span>
-
-          <button>View Details</button>
+          <span className="ref-status pending">Pending</span>
+          <button className="ref-view-btn">
+            <MdVisibility size={14} /> View Details
+          </button>
         </div>
 
         {/* Referral 2 */}
         <div className="referral-item">
-          <div className="referral-number">02</div>
-
+          <div className="ref-num-badge">02</div>
           <div className="referral-details">
             <h3>Diagnostic Consultation</h3>
-            <p>🏥 Community Health Centre</p>
-            <p>📅 20 September 2026</p>
+            <p><MdLocalHospital size={13} /> Community Health Centre</p>
+            <p><MdCalendarMonth size={13} /> 20 September 2026</p>
           </div>
-
-          <span className="status progress">In Progress</span>
-
-          <button>View Details</button>
+          <span className="ref-status progress">In Progress</span>
+          <button className="ref-view-btn">
+            <MdVisibility size={14} /> View Details
+          </button>
         </div>
 
         {/* Referral 3 */}
         <div className="referral-item">
-          <div className="referral-number">03</div>
-
+          <div className="ref-num-badge">03</div>
           <div className="referral-details">
             <h3>Primary Health Checkup</h3>
-            <p>🏥 Primary Health Clinic</p>
-            <p>📅 15 September 2026</p>
+            <p><MdLocalHospital size={13} /> Primary Health Clinic</p>
+            <p><MdCalendarMonth size={13} /> 15 September 2026</p>
           </div>
-
-          <span className="status completed">Completed</span>
-
-          <button>View Details</button>
+          <span className="ref-status completed">Completed</span>
+          <button className="ref-view-btn">
+            <MdVisibility size={14} /> View Details
+          </button>
         </div>
 
       </section>
 
-      {/* Referral Process */}
+      {/* Process */}
       <section className="referral-process">
-
         <h2>Referral Process</h2>
-
         <div className="process-steps">
 
           <div className="process-step active">
-            <span>1</span>
+            <div className="step-circle active-circle">
+              <MdAssignment size={18} />
+            </div>
             <h3>Referral Created</h3>
             <p>Healthcare referral is submitted.</p>
           </div>
 
-          <div className="process-line"></div>
+          <div className="process-line active-line"></div>
 
           <div className="process-step active">
-            <span>2</span>
+            <div className="step-circle active-circle">
+              <MdSync size={18} />
+            </div>
             <h3>Under Review</h3>
             <p>Healthcare worker reviews the referral.</p>
           </div>
@@ -142,7 +156,9 @@ function Referral() {
           <div className="process-line"></div>
 
           <div className="process-step">
-            <span>3</span>
+            <div className="step-circle">
+              <MdPlayCircle size={18} />
+            </div>
             <h3>Appointment</h3>
             <p>Patient receives appointment details.</p>
           </div>
@@ -150,13 +166,14 @@ function Referral() {
           <div className="process-line"></div>
 
           <div className="process-step">
-            <span>4</span>
+            <div className="step-circle">
+              <MdRadioButtonUnchecked size={18} />
+            </div>
             <h3>Completed</h3>
             <p>Referral process is completed.</p>
           </div>
 
         </div>
-
       </section>
 
     </div>

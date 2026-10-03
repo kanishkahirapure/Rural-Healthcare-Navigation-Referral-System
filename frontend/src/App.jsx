@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
@@ -8,8 +8,19 @@ import AIRecommendation from "./Pages/AIRecommendation";
 import Referral from "./Pages/Referral";
 import Appointment from "./Pages/Appointment";
 import Profile from "./Pages/Profile";
+import Contact from "./Pages/Contact";
+import heroImg from "./assets/hero.jpg";
+import { FaHeartbeat, FaRobot, FaHospital, FaCheckCircle } from "react-icons/fa";
+import {
+  MdEmail, MdPhone, MdLocationOn, MdLocalHospital,
+  MdAutoAwesome, MdCalendarMonth, MdMedicalServices,
+  MdLink, MdSchool, MdBadge, MdSecurity,
+  MdSearch, MdAssignment, MdVerified, MdAccessTime,
+  MdArrowForward
+} from "react-icons/md";
 
 function Home() {
+  const navigate = useNavigate();
   return (
     <div className="app">
 
@@ -28,14 +39,14 @@ function Home() {
           <a href="#services">Services</a>
           <a href="#how-it-works">How It Works</a>
           <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+          <Link to="/contact">Contact</Link>
         </nav>
 
         <div className="nav-buttons">
           <Link to="/login" className="login-btn"> 
           Login
           </Link>
-          <button className="register-btn">Get Started</button>
+          <button className="register-btn" onClick={() => navigate("/register")}>Get Started</button>
         </div>
       </header>
 
@@ -44,7 +55,8 @@ function Home() {
         <div className="hero-content">
 
           <div className="badge">
-            <span>●</span> AI-Assisted Healthcare Navigation
+            <FaHeartbeat size={13} color="#087e87" />
+            AI-Assisted Healthcare Navigation
           </div>
 
           <h1>
@@ -59,12 +71,11 @@ function Home() {
           </p>
 
           <div className="hero-buttons">
-            <button className="primary-btn">
-              Find Healthcare Facility →
+            <button className="primary-btn" onClick={() => navigate("/facilities")}>
+              Find Healthcare Facility <MdArrowForward size={17} />
             </button>
-
-            <button className="secondary-btn">
-              ✨ AI Recommendation
+            <button className="secondary-btn" onClick={() => navigate("/ai-recommendation")}>
+              <MdAutoAwesome size={16} color="#087ea4" /> AI Recommendation
             </button>
           </div>
 
@@ -73,16 +84,12 @@ function Home() {
               <strong>24/7</strong>
               <span>Information Access</span>
             </div>
-
             <div className="divider"></div>
-
             <div className="trust-item">
               <strong>AI</strong>
               <span>Assisted Recommendations</span>
             </div>
-
             <div className="divider"></div>
-
             <div className="trust-item">
               <strong>Digital</strong>
               <span>Referral Tracking</span>
@@ -90,69 +97,42 @@ function Home() {
           </div>
         </div>
 
-        {/* Hero Visual */}
+        {/* Hero Image */}
         <div className="hero-visual">
+          <div className="hero-img-wrap">
+            <img src={heroImg} alt="Healthcare" className="hero-img" />
 
-          <div className="main-card">
-            <div className="card-top">
-              <div className="medical-icon">🏥</div>
-
+            {/* Floating cards over image */}
+            <div className="floating-ai">
+              <div className="float-icon-wrap teal-bg">
+                <FaRobot size={18} color="#087ea4" />
+              </div>
               <div>
-                <h3>Healthcare Finder</h3>
-                <p>Find suitable facilities near you</p>
+                <strong>AI Assistance</strong>
+                <p>Smart facility recommendation</p>
               </div>
-
-              <span className="online-dot"></span>
             </div>
 
-            <div className="search-box">
-              <span>🔍</span>
-              <input
-                type="text"
-                placeholder="Search healthcare service..."
-              />
-            </div>
-
-            <div className="location-box">
-              <span>📍</span>
+            <div className="floating-referral">
+              <div className="float-icon-wrap green-bg">
+                <FaCheckCircle size={18} color="#059669" />
+              </div>
               <div>
-                <small>Your Location</small>
-                <strong>Rural / Local Area</strong>
+                <strong>Referral Tracked</strong>
+                <p>Status updated successfully</p>
               </div>
             </div>
 
-            <div className="facility-card">
-              <div className="facility-icon">🏥</div>
-
-              <div className="facility-info">
-                <h4>Healthcare Facility</h4>
-                <p>Specialist • Diagnostics • Emergency</p>
+            <div className="floating-stats">
+              <div className="float-icon-wrap blue-bg">
+                <FaHospital size={18} color="#7c3aed" />
               </div>
-
-              <span className="available">Available</span>
-            </div>
-
-            <button className="view-btn">
-              View Suitable Facilities
-            </button>
-          </div>
-
-          <div className="floating-ai">
-            <div className="ai-icon">✨</div>
-            <div>
-              <strong>AI Assistance</strong>
-              <p>Smart facility recommendation</p>
+              <div>
+                <strong>50+ Facilities</strong>
+                <p>Available near you</p>
+              </div>
             </div>
           </div>
-
-          <div className="floating-referral">
-            <span>✓</span>
-            <div>
-              <strong>Referral Tracked</strong>
-              <p>Status updated successfully</p>
-            </div>
-          </div>
-
         </div>
       </section>
 
@@ -193,46 +173,34 @@ function Home() {
           </p>
         </div>
 
-        <div className="service-grid">
+          <div className="service-grid">
 
           <div className="service-card">
-            <div className="service-icon blue">🏥</div>
+            <div className="service-icon blue"><MdLocalHospital size={24} color="#087ea4" /></div>
             <h3>Find Healthcare Facilities</h3>
-            <p>
-              Search facilities based on location, healthcare services and
-              availability.
-            </p>
-            <a href="#home">Explore Facilities →</a>
+            <p>Search facilities based on location, healthcare services and availability.</p>
+            <Link to="/facilities">Explore Facilities →</Link>
           </div>
 
           <div className="service-card featured">
-            <div className="service-icon teal">✨</div>
+            <div className="service-icon teal"><MdAutoAwesome size={24} color="#079b91" /></div>
             <h3>AI Recommendation</h3>
-            <p>
-              Get AI-assisted facility recommendations based on healthcare
-              requirements and configured facility information.
-            </p>
-            <a href="#home">Get Recommendation →</a>
+            <p>Get AI-assisted facility recommendations based on healthcare requirements and configured facility information.</p>
+            <Link to="/ai-recommendation">Get Recommendation →</Link>
           </div>
 
           <div className="service-card">
-            <div className="service-icon purple">📋</div>
+            <div className="service-icon purple"><MdAssignment size={24} color="#7c3aed" /></div>
             <h3>Digital Referral</h3>
-            <p>
-              Create digital referrals and track the referral status between
-              healthcare facilities.
-            </p>
-            <a href="#home">Manage Referral →</a>
+            <p>Create digital referrals and track the referral status between healthcare facilities.</p>
+            <Link to="/referrals">Manage Referral →</Link>
           </div>
 
           <div className="service-card">
-            <div className="service-icon orange">📅</div>
+            <div className="service-icon orange"><MdCalendarMonth size={24} color="#d97706" /></div>
             <h3>Appointment Management</h3>
-            <p>
-              Manage healthcare appointments and keep important information
-              organized.
-            </p>
-            <a href="#home">Book Appointment →</a>
+            <p>Manage healthcare appointments and keep important information organized.</p>
+            <Link to="/appointments">Book Appointment →</Link>
           </div>
 
         </div>
@@ -241,7 +209,7 @@ function Home() {
       {/* AI Section */}
       <section className="ai-section">
         <div className="ai-content">
-          <div className="ai-badge">✨ AI-ASSISTED HEALTHCARE</div>
+          <div className="ai-badge"><MdAutoAwesome size={13} /> AI-ASSISTED HEALTHCARE</div>
 
           <h2>
             Smarter navigation for
@@ -254,14 +222,16 @@ function Home() {
             available services and configured referral criteria.
           </p>
 
-          <button className="white-btn">
+          <button className="white-btn" onClick={() => navigate("/ai-recommendation")}>
             Try AI Recommendation →
           </button>
         </div>
 
         <div className="ai-panel">
           <div className="ai-panel-header">
-            <span>✨</span>
+            <div className="ai-panel-icon-wrap">
+              <MdAutoAwesome size={18} color="#087ea4" />
+            </div>
             <div>
               <strong>AI Healthcare Assistant</strong>
               <small>Recommendation assistance</small>
@@ -346,9 +316,11 @@ function Home() {
       {/* About */}
       <section className="about-section" id="about">
         <div className="about-card">
-          <div className="about-icon">❤️</div>
+          <div className="about-icon">
+            <FaHeartbeat size={28} color="#087ea4" />
+          </div>
 
-          <div>
+          <div className="about-body">
             <span className="section-label">ABOUT RURALCARE</span>
 
             <h2>
@@ -362,13 +334,43 @@ function Home() {
               centralized digital platform for healthcare navigation and
               referral management.
             </p>
+
+            <div className="about-stats">
+              <div className="about-stat">
+                <strong>24/7</strong>
+                <span>Platform Access</span>
+              </div>
+              <div className="about-stat-divider"></div>
+              <div className="about-stat">
+                <strong>AI</strong>
+                <span>Powered Recommendations</span>
+              </div>
+              <div className="about-stat-divider"></div>
+              <div className="about-stat">
+                <strong>Digital</strong>
+                <span>Referral System</span>
+              </div>
+              <div className="about-stat-divider"></div>
+              <div className="about-stat">
+                <strong>Rural</strong>
+                <span>Healthcare Focus</span>
+              </div>
+            </div>
+
+            <div className="about-actions">
+              <button className="about-primary-btn" onClick={() => navigate("/register")}>
+                Get Started →
+              </button>
+              <button className="about-secondary-btn" onClick={() => navigate("/facilities")}>
+                Explore Facilities
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Disclaimer */}
       <section className="disclaimer">
-        <span>ⓘ</span>
+        <MdMedicalServices size={16} color="#765f2e" />
         <p>
           AI recommendations are intended as assistance based on available
           system information and do not replace professional medical diagnosis
@@ -377,53 +379,104 @@ function Home() {
       </section>
 
       {/* Footer */}
-      <footer id="contact">
-        <div className="footer-main">
+      <footer id="contact" className="site-footer">
 
+        {/* Main Footer */}
+        <div className="footer-inner">
+
+          {/* Brand */}
           <div className="footer-brand">
-            <div className="logo">
-              <div className="logo-icon">✚</div>
+            <div className="footer-logo">
+              <div className="footer-logo-icon">
+                <FaHeartbeat size={20} color="white" />
+              </div>
               <div>
                 <h2>RuralCare</h2>
                 <span>Healthcare Navigation</span>
               </div>
             </div>
-
             <p>
               AI-assisted rural healthcare navigation and digital referral
-              management platform.
+              management platform built to serve rural communities.
             </p>
+            <div className="footer-contact-items">
+              <div className="footer-contact-item">
+                <MdEmail size={15} color="#79b8c9" />
+                <span>support@ruralcare.in</span>
+              </div>
+              <div className="footer-contact-item">
+                <MdPhone size={15} color="#79b8c9" />
+                <span>+91 98765 43210</span>
+              </div>
+              <div className="footer-contact-item">
+                <MdLocationOn size={15} color="#79b8c9" />
+                <span>India — Rural Healthcare Initiative</span>
+              </div>
+            </div>
           </div>
 
-          <div className="footer-column">
-            <h4>Platform</h4>
-            <a href="#services">Healthcare Facilities</a>
-            <a href="#services">AI Recommendation</a>
-            <a href="#services">Digital Referral</a>
-            <a href="#services">Appointments</a>
+          {/* Platform Links */}
+          <div className="footer-col">
+            <h4>
+              <MdLocalHospital size={15} color="#79b8c9" /> Platform
+            </h4>
+            <Link to="/facilities">Healthcare Facilities</Link>
+            <Link to="/ai-recommendation">AI Recommendation</Link>
+            <Link to="/referrals">Digital Referral</Link>
+            <Link to="/appointments">Appointments</Link>
+            <Link to="/dashboard">Dashboard</Link>
           </div>
 
-          <div className="footer-column">
-            <h4>Quick Links</h4>
+          {/* Quick Links */}
+          <div className="footer-col">
+            <h4>
+              <MdLink size={15} color="#79b8c9" /> Quick Links
+            </h4>
             <a href="#home">Home</a>
-            <a href="#about">About</a>
+            <a href="#services">Services</a>
             <a href="#how-it-works">How It Works</a>
-            <a href="#contact">Contact</a>
+            <a href="#about">About</a>
+            <Link to="/contact">Contact Us</Link>
           </div>
 
-          <div className="footer-column">
-            <h4>Project</h4>
-            <p>MCA Final Year Project</p>
-            <p>Session 2026–27</p>
-            <p>Healthcare Technology</p>
+          {/* Project Info */}
+          <div className="footer-col">
+            <h4>
+              <MdSchool size={15} color="#79b8c9" /> Project Info
+            </h4>
+            <div className="footer-info-item">
+              <MdBadge size={14} color="#79b8c9" />
+              <span>MCA Final Year Project</span>
+            </div>
+            <div className="footer-info-item">
+              <MdCalendarMonth size={14} color="#79b8c9" />
+              <span>Session 2026–27</span>
+            </div>
+            <div className="footer-info-item">
+              <MdMedicalServices size={14} color="#79b8c9" />
+              <span>Healthcare Technology</span>
+            </div>
+            <div className="footer-info-item">
+              <MdAutoAwesome size={14} color="#79b8c9" />
+              <span>AI-Based Navigation System</span>
+            </div>
           </div>
 
         </div>
 
+        {/* Bottom Bar */}
         <div className="footer-bottom">
-          <span>© 2026 RuralCare. All rights reserved.</span>
-          <span>AI-Based Rural Healthcare Navigation & Referral System</span>
+          <div className="footer-bottom-left">
+            <span>© 2026 RuralCare. All rights reserved.</span>
+            <span className="footer-dot">•</span>
+            <span>AI-Based Rural Healthcare Navigation &amp; Referral System</span>
+          </div>
+          <div className="footer-bottom-right">
+            <MdSecurity size={14} color="#79b8c9" />
+            <span>Secure &amp; Privacy Protected</span>
+          </div>
         </div>
+
       </footer>
 
     </div>
@@ -442,6 +495,7 @@ function App() {
       <Route path="/referrals" element={<Referral />} />
       <Route path="/appointments" element={<Appointment />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   );
 }

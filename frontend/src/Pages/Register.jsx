@@ -1,5 +1,10 @@
 import "./Register.css";
 import { Link } from "react-router-dom";
+import {
+  MdPerson, MdPhone, MdEmail, MdLock, MdCheckCircle,
+  MdBadge, MdArrowForward, MdSecurity
+} from "react-icons/md";
+import { FaHeartbeat } from "react-icons/fa";
 
 function Register() {
   return (
@@ -8,8 +13,9 @@ function Register() {
       {/* Left Section */}
       <div className="register-left">
         <div className="register-brand">
-          <div className="register-logo">✚</div>
-
+          <div className="register-logo">
+            <FaHeartbeat size={24} color="#087f8c" />
+          </div>
           <div>
             <h2>RuralCare</h2>
             <span>Healthcare Navigation</span>
@@ -34,17 +40,15 @@ function Register() {
 
           <div className="register-features">
             <div>
-              <span>✓</span>
+              <div className="reg-check"><MdCheckCircle size={16} color="#a8f0e7" /></div>
               <p>Find suitable healthcare facilities</p>
             </div>
-
             <div>
-              <span>✓</span>
+              <div className="reg-check"><MdCheckCircle size={16} color="#a8f0e7" /></div>
               <p>Get AI-assisted recommendations</p>
             </div>
-
             <div>
-              <span>✓</span>
+              <div className="reg-check"><MdCheckCircle size={16} color="#a8f0e7" /></div>
               <p>Manage appointments and referrals</p>
             </div>
           </div>
@@ -53,7 +57,6 @@ function Register() {
 
       {/* Right Section */}
       <div className="register-right">
-
         <div className="register-card">
 
           <div className="register-header">
@@ -64,69 +67,57 @@ function Register() {
           <form>
 
             <div className="form-row">
-
               <div className="form-group">
                 <label>Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                />
+                <div className="reg-input-wrap">
+                  <MdPerson size={17} className="reg-icon" />
+                  <input type="text" placeholder="Enter your full name" />
+                </div>
               </div>
-
               <div className="form-group">
                 <label>Mobile Number</label>
-                <input
-                  type="tel"
-                  placeholder="Enter mobile number"
-                />
+                <div className="reg-input-wrap">
+                  <MdPhone size={17} className="reg-icon" />
+                  <input type="tel" placeholder="Enter mobile number" />
+                </div>
               </div>
-
             </div>
 
             <div className="form-group">
               <label>Email Address</label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-              />
+              <div className="reg-input-wrap">
+                <MdEmail size={17} className="reg-icon" />
+                <input type="email" placeholder="Enter your email" />
+              </div>
             </div>
 
             <div className="form-group">
               <label>User Role</label>
-
-              <select defaultValue="">
-                <option value="" disabled>
-                  Select your role
-                </option>
-
-                <option value="patient">
-                  Patient / User
-                </option>
-
-                <option value="healthcare-worker">
-                  Healthcare Worker
-                </option>
-              </select>
+              <div className="reg-input-wrap">
+                <MdBadge size={17} className="reg-icon" />
+                <select defaultValue="">
+                  <option value="" disabled>Select your role</option>
+                  <option value="patient">Patient / User</option>
+                  <option value="healthcare-worker">Healthcare Worker</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-row">
-
               <div className="form-group">
                 <label>Password</label>
-                <input
-                  type="password"
-                  placeholder="Create password"
-                />
+                <div className="reg-input-wrap">
+                  <MdLock size={17} className="reg-icon" />
+                  <input type="password" placeholder="Create password" />
+                </div>
               </div>
-
               <div className="form-group">
                 <label>Confirm Password</label>
-                <input
-                  type="password"
-                  placeholder="Confirm password"
-                />
+                <div className="reg-input-wrap">
+                  <MdLock size={17} className="reg-icon" />
+                  <input type="password" placeholder="Confirm password" />
+                </div>
               </div>
-
             </div>
 
             <div className="terms">
@@ -137,7 +128,7 @@ function Register() {
             </div>
 
             <button type="submit" className="create-account-btn">
-              Create Account →
+              Create Account <MdArrowForward size={18} />
             </button>
 
           </form>
@@ -148,11 +139,11 @@ function Register() {
           </div>
 
           <div className="secure-register">
-            🔒 Your information is securely handled
+            <MdSecurity size={14} color="#059669" />
+            Your information is securely handled
           </div>
 
         </div>
-
       </div>
 
     </div>
