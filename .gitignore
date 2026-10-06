@@ -1,0 +1,16 @@
+# Backend
+target/
+*.class
+
+# Frontend
+node_modules/
+build/
+
+# IDE
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
+.metadata/
+*.iml

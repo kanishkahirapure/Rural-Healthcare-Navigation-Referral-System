@@ -1,0 +1,24 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/user_db
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    enabled: false
+  server:
+    enable-self-preservation: false
+
+jwt:
+  secret: ruralhealthsecretkeymustbeatleast32byteslong123456
+  expiration: 86400000
