@@ -1,0 +1,25 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ai-service
+
+# core-service (facilities + doctors)
+core-service:
+  base-url: http://localhost:8082
+  connect-timeout-ms: 3000
+  read-timeout-ms: 5000
+
+# Google Gemini
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}
+    base-url: https://generativelanguage.googleapis.com
+    model: gemini-3.8-flash
+    connect-timeout-ms: 5000
+    read-timeout-ms: 20000
+
+logging:
+  level:
+    com.ruralhealth: DEBUG
