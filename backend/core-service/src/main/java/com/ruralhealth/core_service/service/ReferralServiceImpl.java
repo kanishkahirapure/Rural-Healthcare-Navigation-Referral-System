@@ -7,6 +7,7 @@ import com.ruralhealth.core_service.model.Facility;
 import com.ruralhealth.core_service.model.Referral;
 import com.ruralhealth.core_service.repository.FacilityRepository;
 import com.ruralhealth.core_service.repository.ReferralRepository;
+import com.ruralhealth.core_service.model.Notification.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class ReferralServiceImpl implements ReferralService {
 
     private final ReferralRepository referralRepository;
     private final FacilityRepository facilityRepository;
-
+    private final NotificationService notificationService;
     @Override
     public ReferralResponse create(ReferralRequest request) {
         Facility toFacility = facilityRepository.findById(request.getToFacilityId())
