@@ -1,11 +1,59 @@
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import { getErrorMessage } from "../api/client";
+import FormMessage from "../components/FormMessage";
 import {
   MdEmail, MdLock, MdArrowForward, MdSecurity, MdCheckCircle
 } from "react-icons/md";
 import { FaHeartbeat } from "react-icons/fa";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function Login() {
+  const { isLoggedIn, login } = useAuth();
+  const location = useLocation();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Where to go after login: the page the user wanted, or the dashboard.
+  const redirectTo = location.state?.from?.pathname ?? "/dashboard";
+  // Set by the Register page after a successful sign-up.
+  const justRegistered = Boolean(location.state?.registered);
+
+  // Already logged in (or just logged in): leave the login page.
+  if (isLoggedIn) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError("");
+
+    // Check the fields before calling the server.
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // On success the user state changes and the redirect above happens.
+      await login({ email: email.trim(), password });
+    } catch (err) {
+      setError(getErrorMessage(err));
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="login-page">
 
@@ -75,13 +123,20 @@ function Login() {
             <p>Enter your details to continue to RuralCare.</p>
           </div>
 
-          <form>
+          <form onSubmit={handleSubmit} noValidate>
 
             <div className="form-group">
               <label>Email Address</label>
               <div className="input-wrapper">
                 <MdEmail size={18} className="inp-icon" />
-                <input type="email" placeholder="Enter your email address" />
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
             </div>
 
@@ -92,7 +147,14 @@ function Login() {
               </div>
               <div className="input-wrapper">
                 <MdLock size={18} className="inp-icon" />
-                <input type="password" placeholder="Enter your password" />
+                <input
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
             </div>
 
@@ -101,8 +163,18 @@ function Login() {
               <span>Remember me</span>
             </label>
 
-            <button type="submit" className="login-submit">
-              Sign In
+            {justRegistered && !error && (
+              <FormMessage type="success">Account created. Please sign in.</FormMessage>
+            )}
+            <FormMessage>{error}</FormMessage>
+
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={loading}
+              style={loading ? { opacity: 0.7, cursor: "not-allowed" } : undefined}
+            >
+              {loading ? "Signing in..." : "Sign In"}
               <MdArrowForward size={18} />
             </button>
 

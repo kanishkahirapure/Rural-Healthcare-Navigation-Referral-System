@@ -1,5 +1,7 @@
 import "./Dashboard.css";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import { formatRole } from "../utils/roles";
 import {
   MdHome, MdLocalHospital, MdAutoAwesome, MdAssignment,
   MdCalendarMonth, MdPerson, MdLogout, MdSearch, MdSmartToy,
@@ -8,6 +10,9 @@ import {
 import { FaHeartbeat } from "react-icons/fa";
 
 function Dashboard() {
+  const { user, logout } = useAuth();
+  const displayName = user?.name || "User";
+
   return (
     <div className="dashboard-page">
 
@@ -39,7 +44,7 @@ function Dashboard() {
           </Link>
         </nav>
 
-        <button className="logout-btn">
+        <button className="logout-btn" onClick={logout}>
           <MdLogout size={18} /> Logout
         </button>
       </aside>
@@ -53,10 +58,10 @@ function Dashboard() {
             <p>Access healthcare services and manage your health easily.</p>
           </div>
           <div className="user-profile">
-            <div className="user-avatar">U</div>
+            <div className="user-avatar">{displayName.charAt(0).toUpperCase()}</div>
             <div>
-              <strong>User</strong>
-              <small>Patient</small>
+              <strong>{displayName}</strong>
+              <small>{formatRole(user?.role)}</small>
             </div>
           </div>
         </div>
