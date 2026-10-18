@@ -9,6 +9,7 @@ import Referral from "./Pages/Referral";
 import Appointment from "./Pages/Appointment";
 import Profile from "./Pages/Profile";
 import Contact from "./Pages/Contact";
+import ProtectedRoute from "./components/ProtectedRoute";
 import heroImg from "./assets/hero.jpg";
 import { FaHeartbeat, FaRobot, FaHospital, FaCheckCircle } from "react-icons/fa";
 import {
@@ -489,12 +490,12 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/facilities" element={<Facilities />} />
       <Route path="/ai-recommendation" element={<AIRecommendation />} />
-      <Route path="/referrals" element={<Referral />} />
-      <Route path="/appointments" element={<Appointment />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/referrals" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
+      <Route path="/appointments" element={<ProtectedRoute><Appointment /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/contact" element={<Contact />} />
     </Routes>
   );
