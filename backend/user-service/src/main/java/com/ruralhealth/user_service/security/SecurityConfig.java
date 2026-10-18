@@ -27,13 +27,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Ye sabke liye open hain (login/register ke liye token ki zaroorat nahi)
+                // Open to everyone: no token needed for login and register
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                // Ye sirf logged-in users ke liye (koi bhi role)
+                // Health check used by Docker and monitoring, must work without a token
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                // Any logged-in user, regardless of role
                 .requestMatchers("/api/users/profile/**").authenticated()
-                // Ye sirf ADMIN role ke liye
+                // ADMIN role only
                 .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
-                // Baaki sab bhi authenticated hone chahiye
+                // Everything else also requires authentication
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

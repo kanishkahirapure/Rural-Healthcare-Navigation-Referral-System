@@ -5,20 +5,27 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:mysql://localhost:3306/user_db
-    username: root
-    password: root
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+    url: ${DB_URL:jdbc:mysql://localhost:3306/user_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}   # replace "root" with your current local password
 
 eureka:
   client:
-    enabled: false
-  server:
-    enable-self-preservation: false
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP:false}
 
 jwt:
-  secret: ruralhealthsecretkeymustbeatleast32byteslong123456
-  expiration: 86400000
+  secret: ${JWT_SECRET:ruralhealth-local-dev-secret-key-change-me-0123456789}
+  expiration: ${JWT_EXPIRATION:86400000}   # milliseconds, 86400000 = 24 hours
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

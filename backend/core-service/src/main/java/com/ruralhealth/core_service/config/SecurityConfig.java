@@ -46,8 +46,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // CORS preflight, error dispatch and API docs
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/error", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
+                .requestMatchers("/error", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+                        "/actuator/health", "/actuator/health/**").permitAll()
                 // Public reads (ai-service calls these without a token)
                 .requestMatchers(HttpMethod.GET, "/api/facilities/**", "/api/doctors/**", "/api/ratings/**").permitAll()
 

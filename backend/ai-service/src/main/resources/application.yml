@@ -5,21 +5,28 @@ spring:
   application:
     name: ai-service
 
-# core-service (facilities + doctors)
 core-service:
-  base-url: http://localhost:8082
+  base-url: ${CORE_SERVICE_URL:http://localhost:8082}
   connect-timeout-ms: 3000
   read-timeout-ms: 5000
 
-# Google Gemini
 gemini:
   api:
     key: ${GEMINI_API_KEY:}
     base-url: https://generativelanguage.googleapis.com
-    model: gemini-3.8-flash
+    model: ${GEMINI_MODEL:gemini-3.8-flash}   # use the model name that worked for you
     connect-timeout-ms: 5000
     read-timeout-ms: 20000
 
 logging:
   level:
     com.ruralhealth: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

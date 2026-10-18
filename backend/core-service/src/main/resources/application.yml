@@ -4,30 +4,35 @@ server:
 spring:
   application:
     name: core-service
-
   datasource:
-    url: jdbc:mysql://localhost:3306/core_db
-    username: root
-    password: root
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-  springdoc:
-    api-docs:
-      path: /v3/api-docs
-    swagger-ui:
-      path: /swagger-ui.html
-      tags-sorter: alpha
-      operations-sorter: alpha
+    url: ${DB_URL:jdbc:mysql://localhost:3306/core_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}   # replace "root" with your current local password
 
 eureka:
   client:
-    enabled: false
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP:false}
 
 jwt:
-  # MUST be identical to jwt.secret in user-service.
-  # Default is only for local development.
   secret: ${JWT_SECRET:ruralhealth-local-dev-secret-key-change-me-0123456789}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
