@@ -4,15 +4,30 @@ server:
 spring:
   application:
     name: core-service
+
   datasource:
     url: jdbc:mysql://localhost:3306/core_db
     username: root
     password: root
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
+  springdoc:
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+      tags-sorter: alpha
+      operations-sorter: alpha
+
 eureka:
   client:
     enabled: false
+
+jwt:
+  # MUST be identical to jwt.secret in user-service.
+  # Default is only for local development.
+  secret: ${JWT_SECRET:ruralhealth-local-dev-secret-key-change-me-0123456789}
