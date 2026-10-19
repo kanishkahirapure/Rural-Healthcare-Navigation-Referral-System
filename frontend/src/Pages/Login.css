@@ -375,3 +375,60 @@ form {
     padding: 28px 22px;
   }
 }
+
+/* ── additions ── */
+.login-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.inp-error {
+  border-color: #dc2626 !important;
+}
+
+.field-err {
+  color: #dc2626;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+}
+
+.forgot-link {
+  color: #087e89;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.demo-creds {
+  margin-top: 28px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.demo-creds p {
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+  margin: 3px 0;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

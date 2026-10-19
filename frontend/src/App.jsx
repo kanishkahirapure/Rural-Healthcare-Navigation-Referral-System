@@ -4,12 +4,22 @@ import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
 import Facilities from "./Pages/Facilities";
+import HospitalSearch from "./Pages/HospitalSearch";
+import HospitalDetails from "./Pages/HospitalDetails";
+import DoctorSearch from "./Pages/DoctorSearch";
 import AIRecommendation from "./Pages/AIRecommendation";
+import Recommendations from "./Pages/Recommendations";
 import Referral from "./Pages/Referral";
 import Appointment from "./Pages/Appointment";
 import Profile from "./Pages/Profile";
 import Contact from "./Pages/Contact";
-import ProtectedRoute from "./components/ProtectedRoute";
+import EmergencyPage from "./Pages/EmergencyPage";
+import Notifications from "./Pages/Notifications";
+import AdminDashboard from "./Pages/AdminDashboard";
+import FacilityManagement from "./Pages/FacilityManagement";
+import DoctorManagement from "./Pages/DoctorManagement";
+import ReferralMonitoring from "./Pages/ReferralMonitoring";
+import MapNavigation from "./Pages/MapNavigation";
 import heroImg from "./assets/hero.jpg";
 import { FaHeartbeat, FaRobot, FaHospital, FaCheckCircle } from "react-icons/fa";
 import {
@@ -487,16 +497,39 @@ function Home() {
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/facilities" element={<Facilities />} />
+      <Route path="/"                  element={<Home />} />
+      <Route path="/login"             element={<Login />} />
+      <Route path="/register"          element={<Register />} />
+
+      {/* Patient */}
+      <Route path="/dashboard"         element={<Dashboard />} />
+      <Route path="/facilities"        element={<Facilities />} />
+      <Route path="/hospital-search"   element={<HospitalSearch />} />
+      <Route path="/hospital/:id"      element={<HospitalDetails />} />
+      <Route path="/doctor-search"     element={<DoctorSearch />} />
       <Route path="/ai-recommendation" element={<AIRecommendation />} />
-      <Route path="/referrals" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
-      <Route path="/appointments" element={<ProtectedRoute><Appointment /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/contact" element={<Contact />} />
+      <Route path="/recommendations"   element={<Recommendations />} />
+      <Route path="/referrals"         element={<Referral />} />
+      <Route path="/referral/:id"      element={<Referral />} />
+      <Route path="/appointments"      element={<Appointment />} />
+      <Route path="/appointment/:id"   element={<Appointment />} />
+      <Route path="/book-appointment"  element={<Appointment />} />
+      <Route path="/emergency"         element={<EmergencyPage />} />
+      <Route path="/notifications"     element={<Notifications />} />
+      <Route path="/profile"           element={<Profile />} />
+      <Route path="/contact"           element={<Contact />} />
+      <Route path="/map"                element={<MapNavigation />} />
+      <Route path="/map/:facilityId"    element={<MapNavigation />} />
+
+      {/* Health Worker */}
+      <Route path="/worker-dashboard"  element={<Dashboard />} />
+
+      {/* Admin */}
+      <Route path="/admin"             element={<AdminDashboard />} />
+      <Route path="/admin/facilities"  element={<FacilityManagement />} />
+      <Route path="/admin/doctors"     element={<DoctorManagement />} />
+      <Route path="/admin/referrals"   element={<ReferralMonitoring />} />
+      <Route path="/admin/users"       element={<AdminDashboard />} />
     </Routes>
   );
 }

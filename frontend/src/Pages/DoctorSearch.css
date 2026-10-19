@@ -1,0 +1,53 @@
+*,*::before,*::after{box-sizing:border-box}
+.ds-root{min-height:100vh;background:#f0f4f8;font-family:'Inter',-apple-system,sans-serif}
+.ds-main{padding:28px 20px 48px}
+.ds-container{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.ds-page-header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px}
+.ds-badge{display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.ds-page-header h1{margin:0 0 4px;font-size:24px;font-weight:700;color:#0f2027}
+.ds-page-header p{margin:0;font-size:14px;color:#718096}
+.ds-count{font-size:14px;color:#718096}.ds-count strong{color:#087ea4;font-size:18px}
+.ds-filters-card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ds-filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ds-input-wrap{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:9px;padding:0 12px;min-width:160px;transition:border-color .15s}
+.ds-input-wrap:focus-within{border-color:#059669}
+.ds-input-wrap input,.ds-input-wrap select{border:none;background:transparent;outline:none;font-size:13px;color:#0f2027;padding:10px 0;font-family:inherit;min-width:0;flex:1}
+.ds-input-wrap input::placeholder{color:#a0aec0}
+.ds-grow{flex:1;min-width:200px}
+.ds-clear{border:none;background:none;cursor:pointer;color:#a0aec0;display:flex;align-items:center;padding:2px}
+.ds-clear:hover{color:#dc2626}
+.ds-check-label{display:flex;align-items:center;gap:7px;font-size:13px;color:#4a5568;font-weight:500;cursor:pointer;white-space:nowrap}
+.ds-check-label input{accent-color:#059669;width:15px;height:15px}
+.ds-reset-btn{width:40px;height:40px;border:1.5px solid #e2e8f0;background:white;color:#718096;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:border-color .15s,color .15s}
+.ds-reset-btn:hover{border-color:#059669;color:#059669}
+.ds-error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;font-size:13px}
+.ds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.ds-skeleton{height:280px;border-radius:12px;background:linear-gradient(90deg,#f0f4f8 25%,#e2e8f0 50%,#f0f4f8 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.ds-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px 20px;text-align:center;background:white;border-radius:12px}
+.ds-empty h3{margin:0;font-size:18px;color:#4a5568}.ds-empty p{margin:0;color:#a0aec0;font-size:14px}
+.ds-empty button{border:none;background:#059669;color:white;padding:10px 22px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
+.ds-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:8px;transition:transform .18s,box-shadow .18s}
+.ds-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.1)}
+.ds-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.ds-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.ds-avail-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.ds-avail-badge.avail{background:#d1fae5;color:#065f46}
+.ds-avail-badge.unavail{background:#fee2e2;color:#991b1b}
+.ds-name{margin:0;font-size:15px;font-weight:700;color:#0f2027}
+.ds-spec{font-size:12px;font-weight:600;color:#7c3aed;background:#ede9fe;padding:3px 9px;border-radius:20px;display:inline-block}
+.ds-qual{margin:0;font-size:11px;color:#718096}
+.ds-meta{display:flex;justify-content:space-between;font-size:12px;color:#4a5568;font-weight:500}
+.ds-meta span{display:flex;align-items:center;gap:4px}
+.ds-hospital{display:flex;align-items:flex-start;gap:5px;font-size:12px;color:#087ea4;font-weight:500}
+.ds-availability{display:flex;align-items:flex-start;gap:5px;font-size:11px;color:#718096}
+.ds-langs{display:flex;flex-wrap:wrap;gap:4px}
+.ds-lang-tag{background:#f3f4f6;color:#6b7280;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
+.ds-card-actions{display:flex;gap:8px;margin-top:4px}
+.ds-book-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:none;background:#059669;color:white;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.ds-book-btn:hover{opacity:.88}
+.ds-hosp-btn{width:36px;height:36px;border:1.5px solid #e2e8f0;background:white;color:#4a5568;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,color .15s;flex-shrink:0}
+.ds-hosp-btn:hover{border-color:#087ea4;color:#087ea4}
+@media(max-width:1100px){.ds-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.ds-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.ds-grid{grid-template-columns:1fr}.ds-filter-row{flex-direction:column}.ds-input-wrap{width:100%}}

@@ -1,458 +1,583 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { appointmentService, facilityService, doctorService } from "../services/store";
+import Navbar from "../components/Navbar";
 import "./Appointment.css";
 import {
-  MdCalendarMonth, MdCheckCircle, MdCancel, MdLocalHospital,
-  MdAdd, MdAccessTime, MdPerson, MdVisibility,
-  MdDescription, MdPhone
+  MdCalendarMonth, MdCheckCircle, MdHourglassTop, MdLocalHospital,
+  MdAdd, MdAccessTime, MdPerson, MdClose, MdDirections,
+  MdWarningAmber, MdStar, MdDescription, MdPhone, MdLocationOn,
+  MdArrowBack,
 } from "react-icons/md";
-import { useAuth } from "../context/useAuth";
-import { cancelAppointment, createAppointment, getAppointmentsByPatient } from "../api/appointments";
-import { getFacilities } from "../api/facilities";
-import { getDoctorsByFacility } from "../api/doctors";
-import { getErrorMessage } from "../api/client";
-import FormMessage from "../components/FormMessage";
+import { FaStethoscope } from "react-icons/fa";
 
-// Backend status -> text, existing CSS class and (when needed) an inline colour.
-const STATUS_UI = {
-  SCHEDULED: { label: "Upcoming", className: "upcoming" },
-  COMPLETED: { label: "Completed", className: "upcoming", style: { background: "#e0f4f8", color: "#087ea4" } },
-  CANCELLED: { label: "Cancelled", className: "pending", style: { background: "#fee2e2", color: "#991b1b" } },
+/* ── helpers ─────────────────────────────────────────────────────────────── */
+const STATUS_STYLE = {
+  CONFIRMED: { bg: "#d1fae5", color: "#065f46", label: "Confirmed" },
+  REQUESTED: { bg: "#fef3c7", color: "#92400e", label: "Requested" },
+  SCHEDULED: { bg: "#d1fae5", color: "#065f46", label: "Scheduled" },
+  COMPLETED: { bg: "#dbeafe", color: "#1e40af", label: "Completed" },
+  CANCELLED: { bg: "#fee2e2", color: "#991b1b", label: "Cancelled" },
 };
 
-const EMPTY_FORM = { facilityId: "", doctorId: "", appointmentDate: "" };
-
-// Inline styles for the booking form, so no CSS file has to change.
-const labelStyle = { display: "block", margin: "14px 0 6px", fontSize: "13px", fontWeight: 600, color: "#102b4e" };
-const fieldStyle = {
-  width: "100%", padding: "10px 14px", border: "1.5px solid #dbe7ee", borderRadius: "9px",
-  background: "white", color: "#536472", fontSize: "13px", outline: "none", fontFamily: "inherit",
-};
-
-// Date -> "2026-11-05T10:30" (the format a datetime-local input understands, in local time).
-function toInputValue(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+function StatusBadge({ status }) {
+  const s = STATUS_STYLE[status] || { bg: "#f3f4f6", color: "#6b7280", label: status };
+  return (
+    <span className="apt-status-pill" style={{ background: s.bg, color: s.color }}>
+      {s.label}
+    </span>
+  );
 }
 
-function formatTime(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+function fmtDate(str) {
+  if (!str) return { mon: "—", day: "—", year: "—", full: "—" };
+  const d = new Date(str);
+  return {
+    mon:  d.toLocaleDateString("en-IN", { month: "short" }).toUpperCase(),
+    day:  d.getDate(),
+    year: d.getFullYear(),
+    full: d.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }),
+  };
 }
 
-function formatDate(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
-}
-
-function Appointment() {
+/* ══════════════════════════════════════════════════════════════
+   MY APPOINTMENTS
+══════════════════════════════════════════════════════════════ */
+function MyAppointments({ onBook }) {
   const { user } = useAuth();
-  const userId = user?.userId;
-
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const [reloadKey, setReloadKey] = useState(0); // change it to load the list again
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [expandedId, setExpandedId] = useState(null);
-  const [cancellingId, setCancellingId] = useState(null);
+  const [filter, setFilter] = useState("ALL");
+  const [confirmCancel, setConfirmCancel] = useState(null);
 
-  // Booking form
-  const [showForm, setShowForm] = useState(false);
-  const [facilities, setFacilities] = useState([]);
-  const [doctors, setDoctors] = useState([]);       // doctors of the chosen facility
-  const [loadingDoctors, setLoadingDoctors] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [minDate, setMinDate] = useState("");       // earliest time the date picker allows
-  const [formError, setFormError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const chosenFacility = useRef(""); // lets us ignore a doctor list that arrives too late
-
-  // Load my appointments.
   useEffect(() => {
-    let cancelled = false;
+    if (user) setAppointments(appointmentService.getByPatient(String(user.id)));
+  }, [user]);
 
-    async function load() {
-      try {
-        const data = await getAppointmentsByPatient(userId);
-        if (cancelled) return;
-        setAppointments(data);
-        setError("");
-      } catch (err) {
-        if (!cancelled) setError(getErrorMessage(err));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  const reload = () => {
+    if (user) setAppointments(appointmentService.getByPatient(String(user.id)));
+  };
 
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId, reloadKey]);
+  const handleCancel = (id) => {
+    appointmentService.updateStatus(id, "CANCELLED");
+    setConfirmCancel(null);
+    reload();
+  };
 
-  // Numbers for the four summary cards.
-  const counts = useMemo(() => ({
-    upcoming: appointments.filter((a) => a.status === "SCHEDULED").length,
+  const canCancel = (status) => ["REQUESTED", "CONFIRMED", "SCHEDULED"].includes(status);
+
+  const FILTER_OPTS = ["ALL", "REQUESTED", "CONFIRMED", "COMPLETED", "CANCELLED"];
+
+  const displayed = filter === "ALL"
+    ? appointments
+    : appointments.filter((a) => a.status === filter);
+
+  const counts = {
+    upcoming:  appointments.filter((a) => ["REQUESTED", "CONFIRMED", "SCHEDULED"].includes(a.status)).length,
     completed: appointments.filter((a) => a.status === "COMPLETED").length,
+    pending:   appointments.filter((a) => a.status === "REQUESTED").length,
     cancelled: appointments.filter((a) => a.status === "CANCELLED").length,
-    centres: new Set(appointments.map((a) => a.facilityId)).size,
-  }), [appointments]);
+  };
 
-  // Upcoming first (soonest on top), then the rest (newest on top).
-  const visible = useMemo(() => {
-    return appointments
-      .filter((a) => statusFilter === "ALL" || a.status === statusFilter)
-      .sort((a, b) => {
-        const aUpcoming = a.status === "SCHEDULED";
-        const bUpcoming = b.status === "SCHEDULED";
-        if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
-        const diff = new Date(a.appointmentDate) - new Date(b.appointmentDate);
-        return aUpcoming ? diff : -diff;
-      });
-  }, [appointments, statusFilter]);
-
-  async function openForm() {
-    setShowForm(true);
-    setFormError("");
-    setNotice("");
-    setMinDate(toInputValue(new Date()));
-    if (facilities.length === 0) {
-      try {
-        setFacilities(await getFacilities());
-      } catch (err) {
-        setFormError(getErrorMessage(err));
-      }
-    }
-  }
-
-  function closeForm() {
-    setShowForm(false);
-    setForm(EMPTY_FORM);
-    setDoctors([]);
-    chosenFacility.current = "";
-    setFormError("");
-  }
-
-  // When the facility changes, load only that facility's doctors.
-  async function handleFacilityChange(value) {
-    setForm((prev) => ({ ...prev, facilityId: value, doctorId: "" }));
-    setDoctors([]);
-    chosenFacility.current = value;
-    if (!value) return;
-
-    setLoadingDoctors(true);
-    try {
-      const list = await getDoctorsByFacility(value);
-      if (chosenFacility.current === value) setDoctors(list);
-    } catch (err) {
-      if (chosenFacility.current === value) setFormError(getErrorMessage(err));
-    } finally {
-      if (chosenFacility.current === value) setLoadingDoctors(false);
-    }
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setFormError("");
-
-    if (!form.facilityId) {
-      setFormError("Please choose a healthcare facility.");
-      return;
-    }
-    if (!form.appointmentDate) {
-      setFormError("Please choose the date and time.");
-      return;
-    }
-    if (new Date(form.appointmentDate) <= new Date()) {
-      setFormError("The appointment must be in the future.");
-      return;
-    }
-
-    // The backend wants "2026-11-05T10:30:00" (with seconds).
-    const date = form.appointmentDate.length === 16 ? `${form.appointmentDate}:00` : form.appointmentDate;
-    const body = { patientId: userId, facilityId: Number(form.facilityId), appointmentDate: date };
-    if (form.doctorId) body.doctorId = Number(form.doctorId);
-
-    setSubmitting(true);
-    try {
-      await createAppointment(body);
-      closeForm();
-      setNotice("Appointment booked successfully.");
-      setReloadKey((k) => k + 1);
-    } catch (err) {
-      setFormError(getErrorMessage(err)); // for example "Doctor is already booked at the selected time"
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleCancel(id) {
-    if (!window.confirm("Do you really want to cancel this appointment?")) return;
-    setCancellingId(id);
-    setError("");
-    setNotice("");
-    try {
-      await cancelAppointment(id);
-      setNotice("Appointment cancelled.");
-      setReloadKey((k) => k + 1);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setCancellingId(null);
-    }
-  }
+  const openDirections = (a) => {
+    const fac = facilityService.getById(a.facilityId);
+    if (fac?.lat && fac?.lng)
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${fac.lat},${fac.lng}`, "_blank");
+    else if (fac?.address)
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fac.address)}`, "_blank");
+  };
 
   return (
-    <div className="appointment-page">
+    <div className="apt-root">
+      <Navbar />
+      <main className="apt-main">
+        <div className="apt-container">
 
-      <header className="appointment-header">
-        <div>
-          <div className="appt-badge">
-            <MdCalendarMonth size={14} />
-            <span>Appointment Management</span>
-          </div>
-          <h1>My Appointments</h1>
-          <p>View and manage your upcoming healthcare appointments.</p>
-        </div>
-        <button className="book-appointment-btn" onClick={showForm ? closeForm : openForm}>
-          <MdAdd size={18} /> {showForm ? "Close Form" : "Book Appointment"}
-        </button>
-      </header>
-
-      <FormMessage type="success">{notice}</FormMessage>
-      <FormMessage type="error">{error}</FormMessage>
-
-      {/* Booking form */}
-      {showForm && (
-        <section className="appointment-list-card" style={{ marginTop: "20px" }}>
-          <div className="appointment-section-heading">
+          {/* Header */}
+          <div className="apt-page-header">
             <div>
-              <h2>Book Appointment</h2>
-              <p>Choose a facility, an optional doctor and a future date and time.</p>
+              <div className="apt-badge"><MdCalendarMonth size={13} /> Appointments</div>
+              <h1>My Appointments</h1>
+              <p>View and manage your healthcare appointments.</p>
+            </div>
+            <button className="apt-book-btn" onClick={onBook}>
+              <MdAdd size={18} /> Book Appointment
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="apt-stats-row">
+            <div className="apt-stat blue-bg" onClick={() => setFilter("ALL")} style={{ cursor: "pointer" }}>
+              <MdCalendarMonth size={22} color="#087ea4" />
+              <div><span>{counts.upcoming}</span><small>Upcoming</small></div>
+            </div>
+            <div className="apt-stat green-bg" onClick={() => setFilter("COMPLETED")} style={{ cursor: "pointer" }}>
+              <MdCheckCircle size={22} color="#059669" />
+              <div><span>{counts.completed}</span><small>Completed</small></div>
+            </div>
+            <div className="apt-stat orange-bg" onClick={() => setFilter("REQUESTED")} style={{ cursor: "pointer" }}>
+              <MdHourglassTop size={22} color="#d97706" />
+              <div><span>{counts.pending}</span><small>Pending</small></div>
+            </div>
+            <div className="apt-stat red-bg" onClick={() => setFilter("CANCELLED")} style={{ cursor: "pointer" }}>
+              <MdClose size={22} color="#dc2626" />
+              <div><span>{counts.cancelled}</span><small>Cancelled</small></div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <label style={labelStyle} htmlFor="appt-facility">Healthcare facility</label>
-            <select
-              id="appt-facility" style={fieldStyle} value={form.facilityId}
-              onChange={(e) => handleFacilityChange(e.target.value)}
-            >
-              <option value="">Select a facility</option>
-              {facilities.map((f) => (
-                <option key={f.id} value={f.id} disabled={f.operatingStatus === "CLOSED"}>
-                  {f.name}
-                  {f.operatingStatus === "CLOSED" ? " (Closed)" : ""}
-                </option>
-              ))}
-            </select>
-
-            <label style={labelStyle} htmlFor="appt-doctor">Doctor (optional)</label>
-            <select
-              id="appt-doctor" style={fieldStyle} value={form.doctorId}
-              disabled={!form.facilityId || loadingDoctors}
-              onChange={(e) => setForm((prev) => ({ ...prev, doctorId: e.target.value }))}
-            >
-              <option value="">
-                {!form.facilityId
-                  ? "Choose a facility first"
-                  : loadingDoctors
-                    ? "Loading doctors..."
-                    : "No specific doctor"}
-              </option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id} disabled={d.isAvailable === false}>
-                  {d.name} - {d.specialization}
-                  {d.isAvailable === false ? " (not available)" : ""}
-                </option>
-              ))}
-            </select>
-
-            <label style={labelStyle} htmlFor="appt-date">Date and time</label>
-            <input
-              id="appt-date" type="datetime-local" style={fieldStyle}
-              min={minDate} value={form.appointmentDate}
-              onChange={(e) => setForm((prev) => ({ ...prev, appointmentDate: e.target.value }))}
-            />
-
-            <FormMessage type="error">{formError}</FormMessage>
-
-            <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
-              <button type="submit" className="book-appointment-btn" disabled={submitting}>
-                {submitting ? "Booking..." : "Confirm Booking"}
-              </button>
-              <button type="button" className="appointment-view-btn" onClick={closeForm}>Cancel</button>
-            </div>
-          </form>
-        </section>
-      )}
-
-      {/* Summary */}
-      <section className="appointment-summary" style={{ marginTop: "28px" }}>
-
-        <div className="appointment-summary-card">
-          <div className="appt-icon-wrap blue-bg">
-            <MdCalendarMonth size={24} color="#087ea4" />
-          </div>
-          <div>
-            <h3>{counts.upcoming}</h3>
-            <p>Upcoming</p>
-          </div>
-        </div>
-
-        <div className="appointment-summary-card">
-          <div className="appt-icon-wrap green-bg">
-            <MdCheckCircle size={24} color="#059669" />
-          </div>
-          <div>
-            <h3>{counts.completed}</h3>
-            <p>Completed</p>
-          </div>
-        </div>
-
-        <div className="appointment-summary-card">
-          <div className="appt-icon-wrap orange-bg">
-            <MdCancel size={24} color="#d97706" />
-          </div>
-          <div>
-            <h3>{counts.cancelled}</h3>
-            <p>Cancelled</p>
-          </div>
-        </div>
-
-        <div className="appointment-summary-card">
-          <div className="appt-icon-wrap purple-bg">
-            <MdLocalHospital size={24} color="#7c3aed" />
-          </div>
-          <div>
-            <h3>{counts.centres}</h3>
-            <p>Healthcare Centres</p>
-          </div>
-        </div>
-
-      </section>
-
-      {/* Appointment List */}
-      <section className="appointment-list-card">
-
-        <div className="appointment-section-heading">
-          <div>
-            <h2>Your Appointments</h2>
-            <p>Your scheduled and past healthcare appointments</p>
-          </div>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="ALL">All Appointments</option>
-            <option value="SCHEDULED">Upcoming</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
-
-        {loading && <p style={{ color: "#6c7885" }}>Loading appointments...</p>}
-
-        {!loading && !error && visible.length === 0 && (
-          <p style={{ color: "#6c7885" }}>
-            {appointments.length === 0
-              ? "No appointments yet. Click \"Book Appointment\" to schedule one."
-              : "No appointments with this status."}
-          </p>
-        )}
-
-        {visible.map((a) => {
-          const status = STATUS_UI[a.status] ?? STATUS_UI.SCHEDULED;
-          const date = new Date(a.appointmentDate);
-          const isOpen = expandedId === a.id;
-
-          return (
-            <div className="appointment-item" key={a.id}>
-              <div className="appointment-date">
-                <span>{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span>
-                <strong>{date.getDate()}</strong>
-                <small>{date.getFullYear()}</small>
+          {/* List card */}
+          <div className="apt-card">
+            <div className="apt-card-head">
+              <div>
+                <h2>Appointment History</h2>
+                <p>{displayed.length} appointment{displayed.length !== 1 ? "s" : ""}</p>
               </div>
+              <select value={filter} onChange={(e) => setFilter(e.target.value)} className="apt-filter-select">
+                {FILTER_OPTS.map((f) => (
+                  <option key={f} value={f}>{f === "ALL" ? "All Statuses" : f}</option>
+                ))}
+              </select>
+            </div>
 
-              <div className="appointment-details">
-                <h3>{a.doctorName ? "Doctor Consultation" : "Facility Visit"}</h3>
-                <p><MdLocalHospital size={13} /> {a.facilityName}</p>
-                <p><MdPerson size={13} /> {a.doctorName ?? "No specific doctor"}</p>
-                <p><MdAccessTime size={13} /> {formatTime(a.appointmentDate)}</p>
-
-                {isOpen && (
-                  <>
-                    <p>Appointment ID: {a.id}</p>
-                    <p>Date: {formatDate(a.appointmentDate)}</p>
-                    <p>Booked on: {formatDate(a.createdAt)}</p>
-                  </>
-                )}
-
-                {a.status === "SCHEDULED" && (
-                  <div style={{ marginTop: "8px" }}>
-                    <button
-                      className="appointment-view-btn"
-                      disabled={cancellingId === a.id}
-                      onClick={() => handleCancel(a.id)}
-                    >
-                      {cancellingId === a.id ? "Cancelling..." : "Cancel Appointment"}
-                    </button>
+            {displayed.length === 0 ? (
+              <div className="apt-empty">
+                <MdCalendarMonth size={48} color="#d1d5db" />
+                <h3>{filter === "ALL" ? "No appointments yet" : `No ${filter.toLowerCase()} appointments`}</h3>
+                <p>Book your first appointment to get started.</p>
+                <button onClick={onBook}>Book Appointment</button>
+              </div>
+            ) : (
+              displayed.map((a) => {
+                const d = fmtDate(a.date || a.appointmentDate);
+                return (
+                  <div key={a.id} className="apt-item">
+                    <div className="apt-date-box">
+                      <span>{d.mon}</span>
+                      <strong>{d.day}</strong>
+                      <small>{d.year}</small>
+                    </div>
+                    <div className="apt-item-info">
+                      <h3>{a.reason || "Healthcare Appointment"}</h3>
+                      <p><MdLocalHospital size={13} /> {a.facilityName || "Healthcare Facility"}</p>
+                      <p><MdPerson size={13} /> {a.doctorName || "Doctor to be assigned"}</p>
+                      <p><MdAccessTime size={13} /> {a.time || "—"}</p>
+                    </div>
+                    <StatusBadge status={a.status} />
+                    <div className="apt-item-actions">
+                      <button className="apt-icon-btn" onClick={() => openDirections(a)} title="Get Directions">
+                        <MdDirections size={16} />
+                      </button>
+                      {canCancel(a.status) && (
+                        <button className="apt-cancel-btn" onClick={() => setConfirmCancel(a.id)}>
+                          Cancel
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <span className={`appointment-status ${status.className}`} style={status.style}>
-                {status.label}
-              </span>
-              <button className="appointment-view-btn" onClick={() => setExpandedId(isOpen ? null : a.id)}>
-                <MdVisibility size={14} /> {isOpen ? "Hide Details" : "View Details"}
-              </button>
-            </div>
-          );
-        })}
-
-      </section>
-
-      {/* Guidelines */}
-      <section className="appointment-info">
-        <h2>Appointment Guidelines</h2>
-        <div className="guideline-grid">
-
-          <div className="guideline-card">
-            <div className="guide-icon orange-bg">
-              <MdAccessTime size={22} color="#d97706" />
-            </div>
-            <div>
-              <h3>Arrive Early</h3>
-              <p>Please arrive at least 15 minutes before your appointment.</p>
-            </div>
+                );
+              })
+            )}
           </div>
 
-          <div className="guideline-card">
-            <div className="guide-icon blue-bg">
-              <MdDescription size={22} color="#087ea4" />
+          {/* Guidelines */}
+          <div className="apt-guidelines">
+            <div className="apt-guide-item">
+              <div className="apt-guide-icon orange-bg"><MdAccessTime size={20} color="#d97706" /></div>
+              <div><strong>Arrive 15 mins early</strong><p>Reach the facility before your scheduled time.</p></div>
             </div>
-            <div>
-              <h3>Carry Documents</h3>
-              <p>Keep your previous medical reports and identification documents.</p>
+            <div className="apt-guide-item">
+              <div className="apt-guide-icon blue-bg"><MdDescription size={20} color="#087ea4" /></div>
+              <div><strong>Carry Documents</strong><p>Bring medical reports and ID proof.</p></div>
             </div>
-          </div>
-
-          <div className="guideline-card">
-            <div className="guide-icon green-bg">
-              <MdPhone size={22} color="#059669" />
-            </div>
-            <div>
-              <h3>Need Help?</h3>
-              <p>Contact the healthcare centre if you need to reschedule.</p>
+            <div className="apt-guide-item">
+              <div className="apt-guide-icon green-bg"><MdPhone size={20} color="#059669" /></div>
+              <div><strong>Need Help?</strong><p>Contact the facility to reschedule.</p></div>
             </div>
           </div>
 
         </div>
-      </section>
+      </main>
 
+      {/* Confirm Cancel Modal */}
+      {confirmCancel && (
+        <div className="apt-modal-overlay">
+          <div className="apt-modal">
+            <MdWarningAmber size={36} color="#d97706" />
+            <h3>Cancel Appointment?</h3>
+            <p>This action cannot be undone. Are you sure you want to cancel this appointment?</p>
+            <div className="apt-modal-actions">
+              <button className="apt-confirm-cancel-btn" onClick={() => handleCancel(confirmCancel)}>
+                Yes, Cancel
+              </button>
+              <button className="apt-keep-btn" onClick={() => setConfirmCancel(null)}>
+                Keep Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default Appointment;
+/* ══════════════════════════════════════════════════════════════
+   BOOK APPOINTMENT
+══════════════════════════════════════════════════════════════ */
+function BookAppointment({ onBack }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const params    = new URLSearchParams(location.search);
+  const initFacId = params.get("facilityId") || "";
+  const initDocId = params.get("doctorId")   || "";
+
+  const allFacilities = facilityService.getAll().filter((f) => f.status !== "CLOSED");
+
+  const [form, setForm] = useState({
+    facilityId: initFacId,
+    doctorId:   initDocId,
+    date:       "",
+    timeSlot:   "",
+    reason:     "",
+    notes:      "",
+  });
+  const [errors,    setErrors]    = useState({});
+  const [loading,   setLoading]   = useState(false);
+  const [confirmed, setConfirmed] = useState(null);
+
+  const facility = allFacilities.find((f) => f.id === form.facilityId);
+  const doctors  = form.facilityId ? doctorService.getByFacility(form.facilityId) : [];
+  const doctor   = doctors.find((d) => d.id === form.doctorId);
+
+  const setF = (k, v) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: "" }));
+  };
+
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 1);
+  const minDateStr = minDate.toISOString().split("T")[0];
+
+  const validate = () => {
+    const e = {};
+    if (!form.facilityId)       e.facilityId = "Please select a hospital.";
+    if (!form.date)              e.date       = "Please select a date.";
+    else if (form.date < minDateStr) e.date   = "Date must be in the future.";
+    if (!form.reason.trim())     e.reason     = "Please enter the reason for visit.";
+    return e;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setLoading(true);
+
+    setTimeout(() => {
+      const apt = appointmentService.create({
+        patientId:    String(user.id),
+        patientName:  user.name,
+        facilityId:   form.facilityId,
+        facilityName: facility?.name || "",
+        doctorId:     form.doctorId  || null,
+        doctorName:   doctor?.name   || "",
+        date:         form.date,
+        time:         form.timeSlot  || "Time to be confirmed",
+        reason:       form.reason,
+        notes:        form.notes,
+        appointmentDate: `${form.date}T10:00:00`,
+      });
+      setLoading(false);
+      setConfirmed(apt);
+    }, 900);
+  };
+
+  /* ── Success Screen ── */
+  if (confirmed) {
+    const d = fmtDate(confirmed.date);
+    return (
+      <div className="apt-root">
+        <Navbar />
+        <main className="apt-main">
+          <div className="apt-container">
+            <div className="apt-success-card">
+              <div className="apt-success-icon"><MdCheckCircle size={56} color="#059669" /></div>
+              <h2>Appointment Requested!</h2>
+              <p>Your appointment has been submitted. You will receive confirmation from the facility.</p>
+
+              <div className="apt-confirm-details">
+                <div className="apt-confirm-row"><span>Appointment ID</span><strong>{confirmed.id}</strong></div>
+                <div className="apt-confirm-row"><span>Hospital</span><strong>{confirmed.facilityName}</strong></div>
+                <div className="apt-confirm-row"><span>Doctor</span><strong>{confirmed.doctorName || "To be assigned"}</strong></div>
+                <div className="apt-confirm-row"><span>Date</span><strong>{d.full}</strong></div>
+                <div className="apt-confirm-row"><span>Time</span><strong>{confirmed.time}</strong></div>
+                <div className="apt-confirm-row"><span>Status</span><StatusBadge status={confirmed.status} /></div>
+              </div>
+
+              <div className="apt-success-note">
+                <MdWarningAmber size={15} color="#92400e" />
+                <span>Status shows "Requested" — confirmation will be sent by the facility.</span>
+              </div>
+
+              <div className="apt-success-actions">
+                <button className="apt-book-btn" onClick={() => navigate("/appointments")}>
+                  <MdCalendarMonth size={16} /> View My Appointments
+                </button>
+                <button className="apt-outline-btn" onClick={() => navigate("/dashboard")}>
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  /* ── Form Screen ── */
+  return (
+    <div className="apt-root">
+      <Navbar />
+      <main className="apt-main">
+        <div className="apt-container">
+
+          <div className="apt-page-header">
+            <div>
+              <div className="apt-badge"><MdCalendarMonth size={13} /> Book Appointment</div>
+              <h1>Book Appointment</h1>
+              <p>Schedule a visit at a healthcare facility.</p>
+            </div>
+            <button className="apt-back-btn" onClick={onBack}>
+              <MdArrowBack size={16} /> My Appointments
+            </button>
+          </div>
+
+          <div className="apt-book-layout">
+
+            {/* Form */}
+            <form className="apt-form-card" onSubmit={handleSubmit} noValidate>
+              <h2>Appointment Details</h2>
+
+              {/* Hospital */}
+              <div className="apt-field">
+                <label>Select Hospital *</label>
+                <div className={`apt-input-wrap ${errors.facilityId ? "apt-err-border" : ""}`}>
+                  <MdLocalHospital size={16} color="#9ab0c0" />
+                  <select
+                    value={form.facilityId}
+                    onChange={(e) => { setF("facilityId", e.target.value); setF("doctorId", ""); setF("timeSlot", ""); }}
+                  >
+                    <option value="">Choose a hospital...</option>
+                    {allFacilities.map((f) => (
+                      <option key={f.id} value={f.id}>{f.name} ({f.area})</option>
+                    ))}
+                  </select>
+                </div>
+                {errors.facilityId && <span className="apt-field-err">{errors.facilityId}</span>}
+              </div>
+
+              {/* Doctor */}
+              <div className="apt-field">
+                <label>Select Doctor <span className="apt-optional">(optional)</span></label>
+                <div className="apt-input-wrap">
+                  <FaStethoscope size={13} color="#9ab0c0" />
+                  <select
+                    value={form.doctorId}
+                    onChange={(e) => { setF("doctorId", e.target.value); setF("timeSlot", ""); }}
+                    disabled={!form.facilityId}
+                  >
+                    <option value="">Any available doctor</option>
+                    {doctors.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name} — {d.specialization}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Date */}
+              <div className="apt-field">
+                <label>Appointment Date *</label>
+                <div className={`apt-input-wrap ${errors.date ? "apt-err-border" : ""}`}>
+                  <MdCalendarMonth size={16} color="#9ab0c0" />
+                  <input
+                    type="date"
+                    value={form.date}
+                    min={minDateStr}
+                    onChange={(e) => setF("date", e.target.value)}
+                  />
+                </div>
+                {errors.date && <span className="apt-field-err">{errors.date}</span>}
+              </div>
+
+              {/* Time Slots */}
+              {doctor?.slots?.length > 0 && (
+                <div className="apt-field">
+                  <label>Preferred Time Slot</label>
+                  <div className="apt-slots-grid">
+                    {doctor.slots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        className={`apt-slot-btn ${form.timeSlot === slot ? "apt-slot-active" : ""}`}
+                        onClick={() => setF("timeSlot", slot)}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Reason */}
+              <div className="apt-field">
+                <label>Reason for Visit *</label>
+                <div className={`apt-input-wrap apt-textarea-wrap ${errors.reason ? "apt-err-border" : ""}`}>
+                  <MdDescription size={16} color="#9ab0c0" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <textarea
+                    rows={3}
+                    placeholder="Describe your health concern or reason..."
+                    value={form.reason}
+                    onChange={(e) => setF("reason", e.target.value)}
+                  />
+                </div>
+                {errors.reason && <span className="apt-field-err">{errors.reason}</span>}
+              </div>
+
+              {/* Notes */}
+              <div className="apt-field">
+                <label>Additional Notes <span className="apt-optional">(optional)</span></label>
+                <div className="apt-input-wrap apt-textarea-wrap">
+                  <MdDescription size={16} color="#9ab0c0" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <textarea
+                    rows={2}
+                    placeholder="Any specific requirements or notes..."
+                    value={form.notes}
+                    onChange={(e) => setF("notes", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="apt-submit-btn" disabled={loading}>
+                {loading
+                  ? <><span className="apt-spinner" /> Submitting…</>
+                  : <><MdCalendarMonth size={16} /> Confirm Appointment</>}
+              </button>
+
+              <div className="apt-disclaimer">
+                <MdWarningAmber size={13} color="#92400e" />
+                <span>Your appointment will be confirmed by the facility. Status shows "Requested" until confirmed.</span>
+              </div>
+            </form>
+
+            {/* Summary Panel */}
+            <div className="apt-summary-panel">
+              <h3>Booking Summary</h3>
+
+              {facility ? (
+                <>
+                  <div className="apt-summary-item">
+                    <div className="apt-sum-icon blue-bg"><MdLocalHospital size={18} color="#087ea4" /></div>
+                    <div>
+                      <small>Hospital</small>
+                      <strong>{facility.name}</strong>
+                      <span><MdLocationOn size={11} /> {facility.address?.split(",").slice(-2).join(",").trim() || "—"}</span>
+                    </div>
+                  </div>
+                  {facility.phone && (
+                    <a href={`tel:${facility.phone}`} className="apt-sum-call">
+                      <MdPhone size={14} /> {facility.phone}
+                    </a>
+                  )}
+                  {facility.hours && (
+                    <div className="apt-sum-hours">
+                      <MdAccessTime size={13} color="#718096" /> {facility.hours}
+                    </div>
+                  )}
+                  {facility.emergency && (
+                    <div className="apt-sum-emergency">✓ Emergency services available</div>
+                  )}
+                </>
+              ) : (
+                <div className="apt-sum-placeholder">
+                  <MdLocalHospital size={36} color="#d1d5db" />
+                  <p>Select a hospital to see details</p>
+                </div>
+              )}
+
+              {doctor && (
+                <div className="apt-summary-item" style={{ marginTop: 14 }}>
+                  <div className="apt-sum-icon green-bg"><FaStethoscope size={16} color="#059669" /></div>
+                  <div>
+                    <small>Doctor</small>
+                    <strong>{doctor.name}</strong>
+                    <span>{doctor.specialization}</span>
+                    {doctor.fee && <span>₹{doctor.fee} consultation fee</span>}
+                  </div>
+                </div>
+              )}
+
+              {form.date && (
+                <div className="apt-summary-item" style={{ marginTop: 14 }}>
+                  <div className="apt-sum-icon orange-bg"><MdCalendarMonth size={18} color="#d97706" /></div>
+                  <div>
+                    <small>Date</small>
+                    <strong>{new Date(form.date).toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}</strong>
+                    {form.timeSlot && <span>{form.timeSlot}</span>}
+                  </div>
+                </div>
+              )}
+
+              {facility?.rating && (
+                <div className="apt-sum-rating">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <MdStar key={s} size={14} color={s <= Math.round(facility.rating) ? "#f59e0b" : "#e2e8f0"} />
+                  ))}
+                  <span>{facility.rating} ({facility.totalRatings} reviews)</span>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ROOT — switches between list and booking based on URL
+══════════════════════════════════════════════════════════════ */
+export default function Appointment() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isBook =
+    location.pathname === "/book-appointment" ||
+    location.search.includes("facilityId") ||
+    location.search.includes("doctorId");
+
+  const [view, setView] = useState(isBook ? "book" : "list");
+
+  // sync view when URL changes
+  useEffect(() => {
+    setView(
+      location.pathname === "/book-appointment" ||
+      location.search.includes("facilityId") ||
+      location.search.includes("doctorId")
+        ? "book"
+        : "list"
+    );
+  }, [location]);
+
+  return view === "book" ? (
+    <BookAppointment
+      onBack={() => { navigate("/appointments"); setView("list"); }}
+    />
+  ) : (
+    <MyAppointments
+      onBook={() => { navigate("/book-appointment"); setView("book"); }}
+    />
+  );
+}

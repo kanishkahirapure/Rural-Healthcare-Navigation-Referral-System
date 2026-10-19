@@ -308,3 +308,59 @@
     gap: 0;
   }
 }
+
+/* ── additions ── */
+.reg-api-err {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.reg-inp-err {
+  border-color: #dc2626 !important;
+}
+
+.reg-field-err {
+  color: #dc2626;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: reg-spin 0.7s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+@keyframes reg-spin { to { transform: rotate(360deg); } }
+
+/* success screen */
+.reg-success-screen {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #f4f8fb;
+  padding: 40px;
+  text-align: center;
+}
+
+.reg-success-icon { animation: pop 0.4s ease; }
+@keyframes pop { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+
+.reg-success-screen h2 { color: #0f2027; font-size: 28px; margin: 0; }
+.reg-success-screen p  { color: #4a5568; font-size: 15px; margin: 0; }
+.reg-redirect-note     { color: #087ea4; font-size: 13px; }

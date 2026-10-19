@@ -1,40 +1,68 @@
-import { useCallback, useMemo, useState } from "react";
-import { login as loginRequest } from "../api/auth";
-import { clearSession, loadSession, saveSession } from "../api/authStorage";
-import { AuthContext } from "./authContextObject";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { authService } from "../services/store";
 
-// Keeps the logged-in user (token, role, name, userId) for the whole app.
+const AuthContext = createContext(null);
+
 export function AuthProvider({ children }) {
-  // Restore the session from localStorage once, when the app starts.
-  const [user, setUser] = useState(() => loadSession());
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+  const [isLoggedIn, setIsLoggedIn] = useState(() => authService.isLoggedIn());
 
-  // Call the backend, save the session and update the state.
-  // Errors are not caught here, so the Login page can show the message.
-  const login = useCallback(async (credentials) => {
-    const data = await loginRequest(credentials); // { token, role, name, userId }
-    saveSession(data);
-    setUser(data);
-    return data;
+  const refreshUser = useCallback(() => {
+    const u = authService.getCurrentUser();
+    setUser(u);
+    setIsLoggedIn(!!u);
   }, []);
 
-  // Forget the session (the Logout button uses this).
+  const login = useCallback((email, password) => {
+    const res = authService.login(email, password);
+    if (res.success) {
+      setUser(res.user);
+      setIsLoggedIn(true);
+    }
+    return res;
+  }, []);
+
+  // Used when backend JWT login succeeds — directly set the user without going through mock store
+  const setUserDirectly = useCallback((userObj) => {
+    authService._setCurrentUser(userObj);
+    setUser(userObj);
+    setIsLoggedIn(true);
+  }, []);
+
   const logout = useCallback(() => {
-    clearSession();
+    authService.logout();
     setUser(null);
+    setIsLoggedIn(false);
   }, []);
 
-  // Change some saved user values, for example the name after a profile update.
-  const updateUser = useCallback((changes) => {
-    if (!user) return;
-    const next = { ...user, ...changes };
-    saveSession(next);
-    setUser(next);
-  }, [user]);
+  const register = useCallback((data) => {
+    const res = authService.register(data);
+    if (res.success) {
+      setUser(res.user);
+      setIsLoggedIn(true);
+    }
+    return res;
+  }, []);
 
-  const value = useMemo(
-    () => ({ user, isLoggedIn: Boolean(user?.token), login, logout, updateUser }),
-    [user, login, logout, updateUser]
+  const updateProfile = useCallback((updates) => {
+    const res = authService.updateProfile(updates);
+    if (res.success) {
+      setUser(res.user);
+    }
+    return res;
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, register, updateProfile, refreshUser, setUserDirectly }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+}
+
+export default AuthContext;

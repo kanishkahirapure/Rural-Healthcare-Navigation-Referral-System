@@ -1,0 +1,223 @@
+/* Recommendations.css */
+*, *::before, *::after { box-sizing: border-box; }
+
+.rec-root { min-height: 100vh; background: #f0f4f8; font-family: 'Inter', -apple-system, sans-serif; }
+.rec-main { padding: 28px 20px 48px; }
+.rec-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Header ── */
+.rec-page-header {
+  display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;
+}
+.rec-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #ede9fe; color: #5b21b6;
+  padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 8px;
+}
+.rec-page-header h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: #0f2027; }
+.rec-page-header p  { margin: 0; font-size: 14px; color: #718096; }
+
+.rec-edit-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid #e2e8f0; background: white; color: #4a5568;
+  padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: border-color .15s, color .15s; white-space: nowrap;
+}
+.rec-edit-btn:hover { border-color: #087ea4; color: #087ea4; }
+
+/* ── Criteria chips ── */
+.rec-criteria-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.rec-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.blue-chip   { background: #dbeafe; color: #1e40af; }
+.teal-chip   { background: #cffafe; color: #164e63; }
+.purple-chip { background: #ede9fe; color: #5b21b6; }
+.gray-chip   { background: #f3f4f6; color: #6b7280; }
+
+/* ── Controls ── */
+.rec-controls {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.rec-count { font-size: 14px; color: #718096; margin-right: auto; }
+.rec-count strong { color: #0f2027; font-size: 16px; }
+
+.rec-sort-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid #e2e8f0; background: white; color: #4a5568;
+  padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.rec-sort-btn:hover, .rec-sort-btn.active { border-color: #087ea4; color: #087ea4; background: #f0f9fc; }
+.rec-sort-btn:disabled { opacity: .5; cursor: default; }
+
+.rec-back-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid #e2e8f0; background: white; color: #4a5568;
+  padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.rec-back-btn:hover { border-color: #087ea4; color: #087ea4; }
+
+/* ── Error ── */
+.rec-error {
+  display: flex; align-items: center; gap: 10px;
+  background: #fef3c7; color: #92400e; border: 1px solid #fde68a;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px;
+}
+.rec-error button {
+  margin-left: auto; display: flex; align-items: center; gap: 4px;
+  border: none; background: #92400e; color: white;
+  padding: 6px 12px; border-radius: 7px; font-size: 12px; cursor: pointer;
+}
+
+/* ── Grid ── */
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* ── Skeleton ── */
+.rec-skeleton {
+  height: 360px; border-radius: 14px;
+  background: linear-gradient(90deg,#f0f4f8 25%,#e2e8f0 50%,#f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── Empty ── */
+.rec-empty {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; padding: 60px 20px; text-align: center;
+}
+.rec-empty h3 { margin: 0; font-size: 18px; color: #4a5568; }
+.rec-empty p  { margin: 0; color: #a0aec0; font-size: 14px; }
+.rec-empty-actions { display: flex; gap: 10px; margin-top: 6px; }
+.rec-empty-actions button {
+  border: none; background: #087ea4; color: white;
+  padding: 10px 22px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.rec-outline-btn {
+  background: white !important; color: #087ea4 !important;
+  border: 1.5px solid #087ea4 !important;
+}
+
+/* ── Card ── */
+.rec-card {
+  background: white; border-radius: 14px; padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.04);
+  display: flex; flex-direction: column; gap: 8px; position: relative;
+  transition: transform .18s, box-shadow .18s;
+}
+.rec-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+.rec-card-top { border: 2px solid #087ea4; }
+
+.rec-rank {
+  position: absolute; top: -10px; left: 16px;
+  background: linear-gradient(135deg,#087ea4,#059669);
+  color: white; font-size: 11px; font-weight: 800;
+  padding: 3px 10px; border-radius: 20px;
+}
+
+.rec-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 8px; }
+.rec-icon-wrap {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.rec-card-badges { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+
+.rec-type-badge, .rec-area-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+}
+.rec-area-badge.rural { background: #d1fae5; color: #065f46; }
+.rec-area-badge.urban { background: #dbeafe; color: #1e40af; }
+.rec-emergency-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+}
+.rec-govt-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #d1fae5; color: #065f46; font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+}
+
+.rec-card-name { margin: 0; font-size: 15px; font-weight: 700; color: #0f2027; line-height: 1.3; }
+
+.rec-reason {
+  display: flex; align-items: flex-start; gap: 6px;
+  background: #f0f9fc; border-radius: 8px; padding: 8px 10px;
+  font-size: 12px; color: #1e40af; line-height: 1.5;
+}
+
+.rec-address {
+  display: flex; align-items: flex-start; gap: 5px;
+  margin: 0; font-size: 12px; color: #718096; line-height: 1.4;
+}
+
+.rec-distance {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; color: #087ea4; font-weight: 600;
+}
+
+.rec-rating {
+  display: flex; align-items: center; gap: 2px;
+  font-size: 13px; font-weight: 600; color: #0f2027;
+}
+.rec-rating-count { color: #a0aec0; font-weight: 400; font-size: 11px; margin-left: 2px; }
+
+.rec-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.rec-dept-tag { background: #f0f9fc; color: #087ea4; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 5px; }
+.rec-svc-tag  { background: #f0fdf4; color: #059669; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 5px; }
+.rec-more-tag { background: #f3f4f6; color: #6b7280; font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+
+.rec-card-actions { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.rec-btn-primary {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; background: #087ea4; color: white;
+  padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+.rec-btn-primary:hover { opacity: .88; }
+
+.rec-btn-icon {
+  width: 36px; height: 36px; border: 1.5px solid #e2e8f0; background: white;
+  color: #4a5568; border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; text-decoration: none; flex-shrink: 0;
+  transition: border-color .15s, color .15s;
+}
+.rec-btn-icon:hover { border-color: #087ea4; color: #087ea4; }
+
+.rec-book-btn {
+  width: 100%; border: 1.5px solid #087ea4; background: white; color: #087ea4;
+  padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.rec-book-btn:hover { background: #087ea4; color: white; }
+
+.rec-referral-btn {
+  width: 100%; border: 1.5px solid #7c3aed; background: white; color: #7c3aed;
+  padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.rec-referral-btn:hover { background: #7c3aed; color: white; }
+
+/* ── Disclaimer ── */
+.rec-disclaimer {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+  padding: 12px 16px; font-size: 12px; color: #92400e; line-height: 1.6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) { .rec-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .rec-main { padding: 18px 14px 40px; }
+  .rec-grid { grid-template-columns: 1fr; }
+  .rec-controls { flex-direction: column; align-items: flex-start; }
+  .rec-count { margin-right: 0; }
+}
