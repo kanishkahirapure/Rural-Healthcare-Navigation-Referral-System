@@ -3,118 +3,117 @@ import "./AIRecommendation.css";
 import {
   MdAutoAwesome, MdPerson, MdLocationOn, MdMedicalServices,
   MdSmartToy, MdWarningAmber, MdLocalHospital, MdCheckCircle,
-  MdRefresh, MdArrowForward
+  MdRefresh, MdMyLocation
 } from "react-icons/md";
 import { FaHeartbeat, FaStethoscope } from "react-icons/fa";
+import { recommend } from "../api/ai";
+import { getErrorMessage } from "../api/client";
+import FormMessage from "../components/FormMessage";
 
-// Simple rule-based AI recommendation logic
-function generateRecommendation(age, location, symptoms, service) {
-  const s = symptoms.toLowerCase();
-  const a = parseInt(age);
+const DEFAULT_SERVICE = "Select a service";
+const EMPTY_FORM = { age: "", symptoms: "", service: DEFAULT_SERVICE };
 
-  let facility = "";
-  let severity = "";
-  let advice = "";
-  let suggestedServices = [];
-  let urgency = "low";
-
-  if (s.includes("chest pain") || s.includes("heart") || s.includes("breathe") || s.includes("breathing")) {
-    facility = "Cardiology & Emergency Centre";
-    severity = "Urgent";
-    urgency = "high";
-    advice = "Chest-related symptoms can be serious. Please seek emergency care immediately.";
-    suggestedServices = ["Emergency Care", "Cardiology Consultation", "ECG Diagnostics"];
-  } else if (s.includes("fever") || s.includes("cold") || s.includes("cough") || s.includes("flu")) {
-    facility = "Primary Health Clinic / General OPD";
-    severity = "Moderate";
-    urgency = "medium";
-    advice = "Common infections can be treated at a nearby primary health centre.";
-    suggestedServices = ["General Consultation", "Blood Test", "Pharmacy"];
-  } else if (s.includes("fracture") || s.includes("injury") || s.includes("accident") || s.includes("broken")) {
-    facility = "RuralCare General Hospital";
-    severity = "Urgent";
-    urgency = "high";
-    advice = "Physical injury requires immediate attention at a hospital with orthopaedic facilities.";
-    suggestedServices = ["Emergency Care", "X-Ray", "Orthopaedic Consultation"];
-  } else if (s.includes("pregnant") || s.includes("delivery") || s.includes("maternity") || s.includes("baby")) {
-    facility = "Maternity & Women's Health Centre";
-    severity = "Planned";
-    urgency = "medium";
-    advice = "Maternity care requires regular check-ups. Please consult a gynaecologist.";
-    suggestedServices = ["Maternity Care", "Ultrasound", "Gynaecology Consultation"];
-  } else if (s.includes("eye") || s.includes("vision") || s.includes("blind")) {
-    facility = "Eye Care & Specialist Clinic";
-    severity = "Moderate";
-    urgency = "medium";
-    advice = "Eye symptoms should be assessed by an ophthalmologist promptly.";
-    suggestedServices = ["Specialist Consultation", "Eye Checkup", "Vision Test"];
-  } else if (s.includes("diabetes") || s.includes("sugar") || s.includes("blood pressure") || s.includes("bp")) {
-    facility = "Community Health Centre";
-    severity = "Routine";
-    urgency = "low";
-    advice = "Chronic conditions like diabetes and BP need regular monitoring at a health centre.";
-    suggestedServices = ["General Consultation", "Blood Sugar Test", "Diagnostic Services"];
-  } else if (service && service !== "Select a service") {
-    facility = "RuralCare General Hospital";
-    severity = "Routine";
-    urgency = "low";
-    advice = `Based on your selected service (${service}), a general healthcare facility is recommended.`;
-    suggestedServices = [service, "General Consultation"];
-  } else {
-    facility = "Primary Health Clinic";
-    severity = "Routine";
-    urgency = "low";
-    advice = "Based on your information, a general health checkup at a nearby clinic is recommended.";
-    suggestedServices = ["General Consultation", "Health Checkup"];
-  }
-
-  // Age-based adjustment
-  if (a < 5) {
-    advice = "For children under 5, please consult a paediatrician. " + advice;
-    suggestedServices.unshift("Paediatric Consultation");
-  } else if (a > 60) {
-    advice = "For elderly patients, special care may be needed. " + advice;
-    suggestedServices.push("Geriatric Care");
-  }
-
-  return { facility, severity, urgency, advice, suggestedServices, location };
-}
+// Backend urgency (LOW | MEDIUM | HIGH) -> label and the CSS class that already exists.
+const URGENCY_UI = {
+  HIGH: { label: "Urgent", className: "urgency-high" },
+  MEDIUM: { label: "Moderate", className: "urgency-medium" },
+  LOW: { label: "Routine", className: "urgency-low" },
+};
 
 function AIRecommendation() {
-  const [form, setForm] = useState({ age: "", location: "", symptoms: "", service: "Select a service" });
-  const [result, setResult] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [coords, setCoords] = useState(null);      // { latitude, longitude } from the browser, or null
+  const [locating, setLocating] = useState(false);
+  const [locationMsg, setLocationMsg] = useState("");
+  const [result, setResult] = useState(null);      // the real answer from the backend
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});        // field errors (shown under the field)
+  const [apiError, setApiError] = useState("");    // error from the server (shown above the button)
 
   const validate = () => {
     const e = {};
-    if (!form.age) e.age = "Please enter your age.";
-    if (!form.location.trim()) e.location = "Please enter your location.";
     if (!form.symptoms.trim()) e.symptoms = "Please describe your symptoms.";
+    if (form.age && (Number(form.age) < 1 || Number(form.age) > 120)) {
+      e.age = "Age must be between 1 and 120.";
+    }
     return e;
   };
 
-  const handleSubmit = (e) => {
+  // Ask the browser for the position. This is optional: the AI also works without it.
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMsg("Your browser does not support location.");
+      return;
+    }
+    setLocating(true);
+    setLocationMsg("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setLocating(false);
+      },
+      (geoError) => {
+        setLocationMsg(
+          geoError.code === 1
+            ? "Location permission was denied. You can still continue without it."
+            : "Could not get your location. You can still continue without it."
+        );
+        setLocating(false);
+      },
+      { timeout: 10000 }
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const e2 = validate();
     if (Object.keys(e2).length > 0) { setErrors(e2); return; }
     setErrors({});
+    setApiError("");
     setLoading(true);
     setResult(null);
 
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const res = generateRecommendation(form.age, form.location, form.symptoms, form.service);
-      setResult(res);
+    // The backend only has a "symptoms" text field, so age and service are added as a short hint.
+    const hints = [];
+    if (form.age) hints.push(`Patient age: ${form.age}.`);
+    if (form.service !== DEFAULT_SERVICE) hints.push(`Preferred service: ${form.service}.`);
+    const symptoms = [form.symptoms.trim().replace(/[.\s]+$/, "") + ".", ...hints].join(" ");
+
+    const body = {
+      symptoms,
+      isEmergency: form.service === "Emergency Care", // "Emergency Care" marks the request as an emergency
+    };
+    if (coords) {
+      body.latitude = coords.latitude;
+      body.longitude = coords.longitude;
+    }
+
+    try {
+      setResult(await recommend(body));
+    } catch (err) {
+      // A server crash gets a friendly text. Other errors (timeout, validation) use their own message.
+      const status = err.response?.status;
+      setApiError(
+        status >= 500
+          ? "The AI assistant is not available right now. Please try again in a moment."
+          : getErrorMessage(err)
+      );
+    } finally {
       setLoading(false);
-    }, 1800);
+    }
   };
 
   const handleReset = () => {
-    setForm({ age: "", location: "", symptoms: "", service: "Select a service" });
+    setForm(EMPTY_FORM);
+    setCoords(null);
+    setLocationMsg("");
     setResult(null);
     setErrors({});
+    setApiError("");
   };
+
+  const urgency = URGENCY_UI[result?.urgency] ?? URGENCY_UI.MEDIUM;
+  const recommendations = result?.recommendations ?? [];
 
   return (
     <div className="ai-page">
@@ -143,7 +142,7 @@ function AIRecommendation() {
 
             <div className="ai-form-row">
               <div className="ai-form-group">
-                <label>Age</label>
+                <label>Age (optional)</label>
                 <div className="ai-input-wrap">
                   <MdPerson size={18} className="ai-input-icon" />
                   <input
@@ -158,17 +157,30 @@ function AIRecommendation() {
               </div>
 
               <div className="ai-form-group">
-                <label>Location</label>
+                <label>Location (optional)</label>
                 <div className="ai-input-wrap">
                   <MdLocationOn size={18} className="ai-input-icon" />
                   <input
                     type="text"
-                    placeholder="Enter your village / city"
-                    value={form.location}
-                    onChange={e => setForm({ ...form, location: e.target.value })}
+                    readOnly
+                    placeholder="Use the button below"
+                    value={
+                      coords
+                        ? `Location found (${coords.latitude.toFixed(2)}, ${coords.longitude.toFixed(2)})`
+                        : ""
+                    }
                   />
                 </div>
-                {errors.location && <span className="ai-error">{errors.location}</span>}
+                <button
+                  type="button"
+                  className="reset-btn"
+                  style={{ marginTop: "8px" }}
+                  onClick={handleUseLocation}
+                  disabled={locating}
+                >
+                  <MdMyLocation size={15} /> {locating ? "Finding you..." : "Use my location"}
+                </button>
+                {locationMsg && <span className="ai-error">{locationMsg}</span>}
               </div>
             </div>
 
@@ -179,6 +191,7 @@ function AIRecommendation() {
                 <textarea
                   placeholder="Describe your symptoms (e.g. fever, chest pain, cough...)"
                   rows="4"
+                  maxLength={900}
                   value={form.symptoms}
                   onChange={e => setForm({ ...form, symptoms: e.target.value })}
                 />
@@ -203,6 +216,8 @@ function AIRecommendation() {
                 </select>
               </div>
             </div>
+
+            <FormMessage type="error">{apiError}</FormMessage>
 
             <button type="submit" className="recommend-btn" disabled={loading}>
               {loading ? (
@@ -231,35 +246,49 @@ function AIRecommendation() {
                   <h3>AI Recommendation Ready</h3>
                   <p>Based on your symptoms and information</p>
                 </div>
-                <span className={`urgency-badge urgency-${result.urgency}`}>
-                  {result.severity}
+                <span className={`urgency-badge ${urgency.className}`}>
+                  {urgency.label}
                 </span>
               </div>
 
-              <div className="ai-result-facility">
-                <div className="result-facility-icon">
-                  <MdLocalHospital size={22} color="#087ea4" />
+              {result.suggestedSpecialization && (
+                <div className="ai-result-advice">
+                  <FaStethoscope size={15} color="#087ea4" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <p>Suggested specialization: <strong>{result.suggestedSpecialization}</strong></p>
                 </div>
-                <div>
-                  <small>RECOMMENDED FACILITY</small>
-                  <strong>{result.facility}</strong>
-                  <p><MdLocationOn size={12} /> {result.location}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="ai-result-advice">
-                <FaStethoscope size={15} color="#087ea4" style={{ flexShrink: 0, marginTop: 2 }} />
-                <p>{result.advice}</p>
-              </div>
-
-              <div className="ai-result-services">
-                <small>SUGGESTED SERVICES</small>
-                <div className="service-tags">
-                  {result.suggestedServices.map((s, i) => (
-                    <span key={i}>{s}</span>
-                  ))}
+              {recommendations.length === 0 && (
+                <div className="ai-result-advice">
+                  <p>No matching facility was found right now. Please try describing your symptoms in more detail.</p>
                 </div>
-              </div>
+              )}
+
+              {recommendations.map((item, index) => (
+                <div className="ai-result-facility" key={`${item.facilityId}-${item.doctorName ?? index}`}>
+                  <div className="result-facility-icon">
+                    <MdLocalHospital size={22} color="#087ea4" />
+                  </div>
+                  <div>
+                    <small>{index === 0 ? "RECOMMENDED FACILITY" : "ALTERNATIVE"}</small>
+                    <strong>{item.facilityName}</strong>
+                    {item.doctorName && (
+                      <p><MdPerson size={12} /> {item.doctorName}</p>
+                    )}
+                    {item.matchScore != null && (
+                      <p><MdCheckCircle size={12} /> Match score: {item.matchScore}%</p>
+                    )}
+                    {item.reason && <p>{item.reason}</p>}
+                  </div>
+                </div>
+              ))}
+
+              {result.disclaimer && (
+                <div className="ai-warning" style={{ marginBottom: "16px" }}>
+                  <MdWarningAmber size={18} color="#b45309" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <p>{result.disclaimer}</p>
+                </div>
+              )}
 
               <button className="reset-btn" onClick={handleReset}>
                 <MdRefresh size={16} /> New Recommendation

@@ -1,7 +1,9 @@
 import "./Dashboard.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { formatRole } from "../utils/roles";
+import NotificationBell from "../components/NotificationBell";
+import AdminStats from "../components/AdminStats";
 import {
   MdHome, MdLocalHospital, MdAutoAwesome, MdAssignment,
   MdCalendarMonth, MdPerson, MdLogout, MdSearch, MdSmartToy,
@@ -11,6 +13,7 @@ import { FaHeartbeat } from "react-icons/fa";
 
 function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const displayName = user?.name || "User";
 
   return (
@@ -57,14 +60,20 @@ function Dashboard() {
             <h1>Welcome to RuralCare 👋</h1>
             <p>Access healthcare services and manage your health easily.</p>
           </div>
-          <div className="user-profile">
-            <div className="user-avatar">{displayName.charAt(0).toUpperCase()}</div>
-            <div>
-              <strong>{displayName}</strong>
-              <small>{formatRole(user?.role)}</small>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <NotificationBell />
+            <div className="user-profile">
+              <div className="user-avatar">{displayName.charAt(0).toUpperCase()}</div>
+              <div>
+                <strong>{displayName}</strong>
+                <small>{formatRole(user?.role)}</small>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Platform numbers (ADMIN only) */}
+        {user?.role === "ADMIN" && <AdminStats />}
 
         {/* Cards */}
         <section className="dashboard-cards">
@@ -120,19 +129,19 @@ function Dashboard() {
           <h2>Quick Actions</h2>
 
           <div className="quick-actions">
-            <button className="quick-btn">
+            <button className="quick-btn" onClick={() => navigate("/facilities")}>
               <div className="quick-icon blue-bg"><MdSearch size={20} color="#087ea4" /></div>
               Find Hospital
             </button>
-            <button className="quick-btn">
+            <button className="quick-btn" onClick={() => navigate("/ai-recommendation")}>
               <div className="quick-icon purple-bg"><MdSmartToy size={20} color="#7c3aed" /></div>
               Ask AI Assistant
             </button>
-            <button className="quick-btn">
+            <button className="quick-btn" onClick={() => navigate("/appointments")}>
               <div className="quick-icon green-bg"><MdEventAvailable size={20} color="#059669" /></div>
               Book Appointment
             </button>
-            <button className="quick-btn">
+            <button className="quick-btn" onClick={() => navigate("/referrals")}>
               <div className="quick-icon orange-bg"><MdTrackChanges size={20} color="#d97706" /></div>
               Track Referral
             </button>
@@ -151,7 +160,7 @@ function Dashboard() {
               recommendations and referral services.
             </p>
           </div>
-          <button>Get Started →</button>
+          <button onClick={() => navigate("/facilities")}>Get Started →</button>
         </section>
 
       </main>

@@ -23,9 +23,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  // Change some saved user values, for example the name after a profile update.
+  const updateUser = useCallback((changes) => {
+    if (!user) return;
+    const next = { ...user, ...changes };
+    saveSession(next);
+    setUser(next);
+  }, [user]);
+
   const value = useMemo(
-    () => ({ user, isLoggedIn: Boolean(user?.token), login, logout }),
-    [user, login, logout]
+    () => ({ user, isLoggedIn: Boolean(user?.token), login, logout, updateUser }),
+    [user, login, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
