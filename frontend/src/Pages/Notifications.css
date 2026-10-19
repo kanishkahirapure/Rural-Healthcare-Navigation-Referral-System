@@ -1,0 +1,29 @@
+*,*::before,*::after{box-sizing:border-box}
+.notif-root{min-height:100vh;background:#f0f4f8;font-family:'Inter',-apple-system,sans-serif}
+.notif-main{padding:28px 20px 48px}
+.notif-container{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.notif-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.notif-header h1{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700;color:#0f2027;margin:0 0 4px}
+.notif-header p{margin:0;color:#718096;font-size:14px}
+.notif-count-badge{background:#dc2626;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px}
+.notif-mark-all-btn{display:flex;align-items:center;gap:6px;border:1.5px solid #e2e8f0;background:white;color:#4a5568;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s;white-space:nowrap}
+.notif-mark-all-btn:hover{border-color:#087ea4;color:#087ea4}
+.notif-tabs{display:flex;gap:8px;background:white;border-radius:10px;padding:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.notif-tab{flex:1;border:none;background:none;color:#718096;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.notif-tab.active{background:#087ea4;color:white}
+.notif-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px 20px;text-align:center;background:white;border-radius:12px}
+.notif-empty h3{margin:0;font-size:17px;color:#4a5568}
+.notif-empty p{margin:0;color:#a0aec0;font-size:13px}
+.notif-list{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.notif-item{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid #f0f4f8;cursor:pointer;transition:background .12s}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:#f8fafc}
+.notif-unread{background:#f0f9fc}
+.notif-unread:hover{background:#e0f4f8}
+.notif-item-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-body strong{display:block;font-size:14px;font-weight:600;color:#0f2027}
+.notif-item-body p{margin:4px 0;font-size:13px;color:#4a5568;line-height:1.5}
+.notif-item-body small{font-size:11px;color:#a0aec0}
+.notif-item-right{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.notif-unread-dot{width:9px;height:9px;border-radius:50%;background:#087ea4}
