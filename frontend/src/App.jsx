@@ -1,5 +1,4 @@
 import "./App.css";
-import React from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
@@ -23,7 +22,6 @@ import {
 
 function Home() {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = React.useState(false);
   return (
     <div className="app">
 
@@ -46,26 +44,12 @@ function Home() {
         </nav>
 
         <div className="nav-buttons">
-          <Link to="/login" className="login-btn">Login</Link>
+          <Link to="/login" className="login-btn"> 
+          Login
+          </Link>
           <button className="register-btn" onClick={() => navigate("/register")}>Get Started</button>
         </div>
-
-        <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
       </header>
-
-      <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
-        <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
-        <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-        <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How It Works</a>
-        <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
-        <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
-        <div className="mob-btns">
-          <Link to="/login" className="login-btn" onClick={() => setMenuOpen(false)}>Login</Link>
-          <button className="register-btn" onClick={() => { setMenuOpen(false); navigate("/register"); }}>Get Started</button>
-        </div>
-      </div>
 
       {/* Hero Section */}
       <section className="hero" id="home">
