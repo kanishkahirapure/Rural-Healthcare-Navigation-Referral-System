@@ -91,3 +91,17 @@ CREATE TABLE notifications (
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- One rating per patient per facility (matches the unique constraint in Rating.java).
+-- patient_id has no foreign key because users live in another database (user_db).
+CREATE TABLE ratings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    facility_id BIGINT NOT NULL,
+    patient_id BIGINT NOT NULL,
+    stars INT NOT NULL,
+    comment_text VARCHAR(500),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_rating_facility_patient UNIQUE (facility_id, patient_id),
+    CONSTRAINT fk_ratings_facility FOREIGN KEY (facility_id) REFERENCES facilities(id),
+    CONSTRAINT chk_ratings_stars CHECK (stars BETWEEN 1 AND 5)
+);

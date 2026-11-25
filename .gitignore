@@ -14,3 +14,8 @@ build/
 .settings/
 .metadata/
 *.iml
+
+# Local secrets: never commit. Copy .env.example to .env instead.
+.env
+.env.*
+!.env.example

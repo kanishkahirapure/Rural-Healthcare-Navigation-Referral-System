@@ -17,7 +17,9 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       # Runs only on the first start, when the data volume is empty
+      # Files run in alphabetical order: 01 creates the tables, 02 inserts the demo data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     ports:
       - "3307:3306"   # 3307 on the host so it does not clash with a local MySQL on 3306
     healthcheck:
@@ -95,6 +97,7 @@ services:
       CORE_SERVICE_URL: http://core-service:8082
       # Empty key is allowed: the service then uses its keyword fallback
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # gemini-3.8-flash is a valid, stable model name in the Gemini API docs
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
     depends_on:
       core-service:

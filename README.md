@@ -160,10 +160,19 @@ Every response uses one wrapper, `ApiResponse<T>`.
    | Frontend | http://localhost:5173 |
    | API gateway | http://localhost:8080 |
    | Swagger UI (core-service) | http://localhost:8082/swagger-ui.html |
+   | Eureka dashboard | http://localhost:8761 |
+   | MySQL (from your computer) | `localhost:3307` (user `root`, password from `.env`) |
 
-4. Stop: `docker compose down`. Reset the database as well: `docker compose down -v`.
+   The first build takes a few minutes. The services start in order and each one waits for
+   the previous one to be healthy. Check progress with `docker compose ps`.
 
-The database is created from `database/schema.sql` and `database/seed.sql` on the first start only.
+4. Stop: `docker compose down`. Your data is kept in a Docker volume, so it is still there on the next start.
+5. **Reset the database:** `docker compose down -v` (the `-v` deletes the volume). On the next
+   `docker compose up --build` the database is created again from `database/schema.sql` and
+   `database/seed.sql`.
+
+> The SQL files run on the **first start only**, when the database volume is empty.
+> If you change `schema.sql` or `seed.sql`, run `docker compose down -v` first.
 
 ## Run Locally (without Docker)
 

@@ -1,6 +1,7 @@
 -- Seed data for core_db (demo facilities and doctors, Nagpur / Vidarbha region)
--- Run this AFTER core-service has started once, so Hibernate has created the tables.
--- Run only once: running it again will insert duplicate rows.
+-- The tables come from schema.sql (the services do not create them).
+-- Docker loads this file automatically after schema.sql, on the first start only.
+-- Running it again by hand will insert duplicate rows.
 
 USE core_db;
 
