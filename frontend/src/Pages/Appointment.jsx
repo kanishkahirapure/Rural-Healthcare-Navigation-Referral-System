@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { appointmentService, facilityService, doctorService } from "../services/store";
+import {
+  getAppointments, cancelAppointment, createAppointment,
+  getFacilities, getFacility, getDoctorsByFacility,
+} from "../services/liveData";
 import Navbar from "../components/Navbar";
 import "./Appointment.css";
 import {
@@ -51,16 +54,29 @@ function MyAppointments({ onBook }) {
   const [filter, setFilter] = useState("ALL");
   const [confirmCancel, setConfirmCancel] = useState(null);
 
-  useEffect(() => {
-    if (user) setAppointments(appointmentService.getByPatient(String(user.id)));
-  }, [user]);
+  const [loadError, setLoadError] = useState("");
 
-  const reload = () => {
-    if (user) setAppointments(appointmentService.getByPatient(String(user.id)));
+  const reload = async () => {
+    if (!user) return;
+    try {
+      setLoadError("");
+      setAppointments(await getAppointments(user.id));
+    } catch (e) {
+      setLoadError(e.message || "Could not load appointments.");
+    }
   };
 
-  const handleCancel = (id) => {
-    appointmentService.updateStatus(id, "CANCELLED");
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const handleCancel = async (id) => {
+    try {
+      await cancelAppointment(id);
+    } catch (e) {
+      setLoadError(e.message || "Could not cancel the appointment.");
+    }
     setConfirmCancel(null);
     reload();
   };
@@ -80,10 +96,13 @@ function MyAppointments({ onBook }) {
     cancelled: appointments.filter((a) => a.status === "CANCELLED").length,
   };
 
-  const openDirections = (a) => {
-    const fac = facilityService.getById(a.facilityId);
-    if (fac?.lat && fac?.lng)
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${fac.lat},${fac.lng}`, "_blank");
+  const openDirections = async (a) => {
+    let fac = null;
+    try { fac = await getFacility(a.facilityId); } catch { /* ignore, no directions */ }
+    const lat = fac?.latitude ?? fac?.lat;
+    const lng = fac?.longitude ?? fac?.lng;
+    if (lat && lng)
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, "_blank");
     else if (fac?.address)
       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fac.address)}`, "_blank");
   };
@@ -93,6 +112,8 @@ function MyAppointments({ onBook }) {
       <Navbar />
       <main className="apt-main">
         <div className="apt-container">
+
+          {loadError && <div className="apt-field-err" style={{ marginBottom: 12 }}>{loadError}</div>}
 
           {/* Header */}
           <div className="apt-page-header">
@@ -233,7 +254,8 @@ function BookAppointment({ onBack }) {
   const initFacId = params.get("facilityId") || "";
   const initDocId = params.get("doctorId")   || "";
 
-  const allFacilities = facilityService.getAll().filter((f) => f.status !== "CLOSED");
+  const [allFacilities, setAllFacilities] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const [form, setForm] = useState({
     facilityId: initFacId,
@@ -247,9 +269,25 @@ function BookAppointment({ onBack }) {
   const [loading,   setLoading]   = useState(false);
   const [confirmed, setConfirmed] = useState(null);
 
-  const facility = allFacilities.find((f) => f.id === form.facilityId);
-  const doctors  = form.facilityId ? doctorService.getByFacility(form.facilityId) : [];
-  const doctor   = doctors.find((d) => d.id === form.doctorId);
+  // Load the hospital list once (backend first, demo data if the backend is offline)
+  useEffect(() => {
+    getFacilities()
+      .then((list) =>
+        setAllFacilities((list || []).filter((f) => (f.operatingStatus || f.status) !== "CLOSED"))
+      )
+      .catch(() => setAllFacilities([]));
+  }, []);
+
+  // Load the doctors of the selected hospital
+  useEffect(() => {
+    if (!form.facilityId) { setDoctors([]); return; }
+    getDoctorsByFacility(form.facilityId)
+      .then((list) => setDoctors(list || []))
+      .catch(() => setDoctors([]));
+  }, [form.facilityId]);
+
+  const facility = allFacilities.find((f) => String(f.id) === String(form.facilityId));
+  const doctor   = doctors.find((d) => String(d.id) === String(form.doctorId));
 
   const setF = (k, v) => {
     setForm((f) => ({ ...f, [k]: v }));
@@ -269,29 +307,31 @@ function BookAppointment({ onBack }) {
     return e;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
 
-    setTimeout(() => {
-      const apt = appointmentService.create({
-        patientId:    String(user.id),
+    try {
+      const apt = await createAppointment({
+        patientId:    user.id,
         patientName:  user.name,
         facilityId:   form.facilityId,
         facilityName: facility?.name || "",
         doctorId:     form.doctorId  || null,
         doctorName:   doctor?.name   || "",
         date:         form.date,
-        time:         form.timeSlot  || "Time to be confirmed",
+        time:         form.timeSlot  || "",
         reason:       form.reason,
         notes:        form.notes,
-        appointmentDate: `${form.date}T10:00:00`,
       });
-      setLoading(false);
       setConfirmed(apt);
-    }, 900);
+    } catch (err) {
+      setErrors({ submit: err.message || "Could not book the appointment." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ── Success Screen ── */
@@ -371,7 +411,7 @@ function BookAppointment({ onBack }) {
                   >
                     <option value="">Choose a hospital...</option>
                     {allFacilities.map((f) => (
-                      <option key={f.id} value={f.id}>{f.name} ({f.area})</option>
+                      <option key={f.id} value={f.id}>{f.name} ({f.area || f.address})</option>
                     ))}
                   </select>
                 </div>
@@ -443,6 +483,7 @@ function BookAppointment({ onBack }) {
                   />
                 </div>
                 {errors.reason && <span className="apt-field-err">{errors.reason}</span>}
+                {errors.submit && <span className="apt-field-err">{errors.submit}</span>}
               </div>
 
               {/* Notes */}

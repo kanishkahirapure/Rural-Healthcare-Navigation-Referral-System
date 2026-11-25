@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { notificationService } from "../services/store";
+import { getNotifications, markNotificationRead, markAllNotificationsRead } from "../services/liveData";
 import Navbar from "../components/Navbar";
 import "./Notifications.css";
 import {
@@ -31,20 +31,28 @@ export default function Notifications() {
   const [notifs,  setNotifs]  = useState([]);
   const [filter,  setFilter]  = useState("all"); // all | unread
 
-  useEffect(() => {
-    if (user) {
-      setNotifs(notificationService.getAll(String(user.id)));
+  const load = async () => {
+    if (!user) return;
+    try {
+      setNotifs((await getNotifications(user.id)) || []);
+    } catch {
+      setNotifs([]);
     }
-  }, [user]);
-
-  const markRead = (id) => {
-    notificationService.markRead(id);
-    setNotifs(notificationService.getAll(String(user.id)));
   };
 
-  const markAllRead = () => {
-    notificationService.markAllRead(String(user.id));
-    setNotifs(notificationService.getAll(String(user.id)));
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const markRead = async (id) => {
+    try { await markNotificationRead(id); } catch { /* keep list as it is */ }
+    load();
+  };
+
+  const markAllRead = async () => {
+    try { await markAllNotificationsRead(user.id); } catch { /* keep list as it is */ }
+    load();
   };
 
   const handleClick = (n) => {

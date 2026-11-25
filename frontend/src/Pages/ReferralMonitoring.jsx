@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { referralService } from "../services/store";
+import { getAllReferrals } from "../services/liveData";
 import Navbar from "../components/Navbar";
 import "./AdminManagement.css";
 import {
@@ -22,7 +22,14 @@ const PRIORITY_STYLE = {
 
 export default function ReferralMonitoring() {
   const navigate = useNavigate();
-  const allReferrals = referralService.getAll();
+  const [allReferrals, setAllReferrals] = useState([]);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    getAllReferrals()
+      .then((list) => setAllReferrals(list || []))
+      .catch((e) => setLoadError(e.message || "Could not load referrals."));
+  }, []);
 
   const [search, setSearch]         = useState("");
   const [statusFilter, setStatus]   = useState("ALL");
@@ -136,7 +143,7 @@ export default function ReferralMonitoring() {
               </tbody>
             </table>
             {filtered.length===0 && (
-              <div className="amg-no-results">No referrals match your search/filter.</div>
+              <div className="amg-no-results">{loadError || "No referrals match your search/filter."}</div>
             )}
           </div>
 

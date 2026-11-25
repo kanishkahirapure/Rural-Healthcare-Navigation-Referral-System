@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { notificationService } from "../services/store";
+import { getUnreadCount } from "../services/liveData";
 import { FaHeartbeat } from "react-icons/fa";
 import {
   MdDashboard, MdLocalHospital, MdPerson, MdLogout,
@@ -17,9 +17,13 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const unreadCount = user
-    ? notificationService.getUnread(user.id).length
-    : 0;
+  // Unread count comes from the backend (demo data if the backend is offline)
+  const [fetchedUnread, setFetchedUnread] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    getUnreadCount(user.id).then(setFetchedUnread).catch(() => setFetchedUnread(0));
+  }, [user, location.pathname]);
+  const unreadCount = user ? fetchedUnread : 0;
 
   const isActive = (path) =>
     location.pathname === path ? "nav-item active-nav" : "nav-item";
